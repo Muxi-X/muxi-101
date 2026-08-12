@@ -17,13 +17,13 @@ const footer = <Footer>MIT {new Date().getFullYear()} © Nextra.</Footer>
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-		<Layout
-			navbar={navbar}
-			pageMap={await getPageMap()}
-			docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
-			footer={footer}
-		>
-			{children}
-		</Layout>
+    <Layout
+      navbar={navbar}
+      pageMap={await getPageMap()}
+      docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+      footer={footer}
+    >
+      {children}
+    </Layout>
   )
 }

@@ -1,49 +1,52 @@
 import { Footer, Layout, Navbar, ThemeSwitch } from 'nextra-theme-blog'
 import { Banner, Search } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
+import Link from 'next/link'
 import 'nextra-theme-blog/style.css'
- 
+
 export const metadata = {
-  title: 'Blog Example'
+  title: 'Blog Example',
 }
- 
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const banner = (
     <Banner storageKey="4.0-release">
       🎉 Nextra 4.0 is released.{' '}
       <a
-        href="#"
+        href="https://nextra.site"
+        target="_blank"
+        rel="noreferrer"
         style={{
           textDecoration: 'underline',
-          textUnderlinePosition: 'from-font'
+          textUnderlinePosition: 'from-font',
         }}
       >
         Read more →
       </a>
     </Banner>
   )
- 
+
   return (
-		<Layout banner={banner}>
-			<Navbar pageMap={await getPageMap()}>
-				<Search />
-				<ThemeSwitch />
-			</Navbar>
+    <Layout banner={banner}>
+      <Navbar pageMap={await getPageMap()}>
+        <Search />
+        <ThemeSwitch />
+      </Navbar>
 
-			{children}
+      {children}
 
-			<Footer>
-				<abbr
-					title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
-					style={{ cursor: 'help' }}
-				>
-					CC BY-NC 4.0
-				</abbr>{' '}
-				{new Date().getFullYear()} © Dimitri POSTOLOV.
-				<a href="/feed.xml" style={{ float: 'right' }}>
-					RSS
-				</a>
-			</Footer>
-		</Layout>
+      <Footer>
+        <abbr
+          title="This site and all its content are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
+          style={{ cursor: 'help' }}
+        >
+          CC BY-NC 4.0
+        </abbr>{' '}
+        {new Date().getFullYear()} © Dimitri POSTOLOV.
+        <Link href="/feed.xml" style={{ float: 'right' }}>
+          RSS
+        </Link>
+      </Footer>
+    </Layout>
   )
 }

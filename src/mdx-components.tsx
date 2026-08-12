@@ -10,6 +10,6 @@ export function useMDXComponents(components: Record<string, React.ComponentType<
   return {
     ...docsThemeComponents,
     ...blogThemeComponents,
-    ...components
+    ...components,
   }
 }
