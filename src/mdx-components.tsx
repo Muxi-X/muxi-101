@@ -6,7 +6,7 @@ const docsThemeComponents = getDocsThemeComponents()
 const blogThemeComponents = getBlogThemeComponents()
 
 // Merge components
-export function useMDXComponents(components: Record<string, React.ComponentType<any>>) {
+export function useMDXComponents(components: Record<string, React.ComponentType<unknown>>) {
   return {
     ...docsThemeComponents,
     ...blogThemeComponents,
