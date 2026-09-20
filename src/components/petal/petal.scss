@@ -1,0 +1,85 @@
+.fallingLeaves span {
+  opacity: 0;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin: -280px 60px 54px -34px;
+  background: url("../../../static/image/logo.png") no-repeat center / auto;
+  position: absolute;
+  top: 0;
+  animation: fallingLeaves 5s infinite linear;
+}
+
+.fallingLeaves span:nth-child(1) { left: 10%; animation-delay: 0.5s; }
+.fallingLeaves span:nth-child(2) { left: 20%; animation-delay: 1.5s; }
+.fallingLeaves span:nth-child(3) { left: 30%; animation-delay: 2.5s; }
+.fallingLeaves span:nth-child(4) { left: 40%; animation-delay: 0.2s; }
+.fallingLeaves span:nth-child(5) { left: 50%; animation-delay: 1.2s; }
+.fallingLeaves span:nth-child(6) { left: 60%; animation-delay: 2.2s; }
+.fallingLeaves span:nth-child(7) { left: 70%; animation-delay: 0.7s; }
+.fallingLeaves span:nth-child(8) { left: 80%; animation-delay: 1.7s; }
+.fallingLeaves span:nth-child(9) { left: 90%; animation-delay: 2.7s; }
+.fallingLeaves span:nth-child(10) { left: 95%; animation-delay: 0.9s; }
+
+@keyframes fallingLeaves {
+  0% {
+    opacity: 0;
+    transform: translateY(0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(60vh) rotate(270deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(80vh) rotate(360deg);
+  }
+}
+
+/* 为每个元素添加独特的水平移动 */
+.fallingLeaves span:nth-child(odd) {
+  animation-name: fallingLeavesOdd;
+}
+
+.fallingLeaves span:nth-child(even) {
+  animation-name: fallingLeavesEven;
+}
+
+@keyframes fallingLeavesOdd {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+    transform: translate(50px, 60vh) rotate(270deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(75px, 80vh) rotate(360deg);
+  }
+}
+
+@keyframes fallingLeavesEven {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50px, 60vh) rotate(-270deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-75px, 80vh) rotate(-360deg);
+  }
+}

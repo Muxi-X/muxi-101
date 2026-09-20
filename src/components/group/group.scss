@@ -1,0 +1,271 @@
+@import "../banner/banner.scss";
+@import "../../styles/base.scss";
+@import "../../styles/color.scss";
+
+$group-count: 6;
+$group-angle: calc(360deg / $group-count);
+$group-adapt: calc(360deg / $group-count);
+
+.wrapper {
+  padding-top: 2%;
+  width: 100%;
+  height: 100%;
+  .group-content-box {
+    margin: 10%;
+    height: 100%;
+
+    
+    // 使用响应式grid布局，分别实现大中小屏幕尺寸的适配，根据tailwind建议，以移动端为准
+    // lg：｜left｜controller｜right｜
+    //
+    // md：｜letf｜right ｜
+    //    ｜ controller ｜
+    //
+    //sm： ｜   left   ｜
+    //    ｜controller｜
+    //   ｜   right  ｜  
+    //谁有时间可以拿tailwind重写得了
+
+    .group-content {
+      display: grid;
+      height: 100%;
+      width: 100%;
+      grid-template-areas: 
+        "controller"
+        "right"
+        "left";
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      //md
+      @media (min-width: 768px){
+        grid-template-areas: 
+          "controller controller"
+          "left right";
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      //lg
+      @media (min-width: 1024px){
+        grid-template-areas: 
+          "left controller right";
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr;
+      }
+
+
+      
+
+      .group-left {
+        grid-area: left;
+        max-height: 250px;
+        min-width: 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // background-color: #f06d64;
+
+        .group-left-content {
+          display: flex;
+          flex-direction: column;
+          padding-top: 5%;
+          height: auto;
+          .group-name {
+            font-size: 30px;
+            @media (min-width: 768px){
+              font-size: 35px;
+            }
+      
+            //lg
+            @media (min-width: 1024px){
+              font-size: 40px;
+            }
+            color: $txt-white;
+            margin-top: 5%;
+          }
+          .group-intro {
+            width: 100%;
+            font-size: 20px;
+            color: $txt-white;
+            margin-top: 5%;
+            line-height: 30px;
+          }
+          .group-learn {
+            color: $txt-white;
+            margin-top: 10%;
+            font-size: 20px;
+            line-height: 30px;
+          }
+        }
+      }
+
+      .group-controller-box {
+        grid-area: controller;
+        grid-column: span 1 / span 1;
+
+        @media (min-width: 768px){
+          grid-column: span 2 / span 2;
+        }
+        @media (min-width: 1024px){
+          grid-column: span 1 / span 1;
+        }
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        min-width: 150px;
+        display: flex;
+        // background-color: #6470f0;
+        justify-content: center;
+        padding-top: 12%;
+        .group-controller {
+          .circle-menu {
+            // background-color: antiquewhite;
+            width: 80px;
+            height: 80px;
+            border: solid 1px $controller-border;
+            border-radius: 50%;
+            position: relative;
+
+            .circle-menu-round {
+              position: relative;
+              width: 80px;
+              height: 80px;
+              .circle-menu-dot {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background-image: url("../../../static/image/logo.png");
+                background-repeat: no-repeat;
+                background-position: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) translate(0,-35px);
+              }
+            }
+
+            .group-list {
+              cursor: pointer;
+              .group-item{
+                background-color: $txt-white;
+                a {
+                  display: block;
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  width: 40px;
+                  height: 40px;
+                  line-height: 40px;
+                  margin: -20px;
+                  text-align: center;
+                  text-decoration: none;
+                  color: $txt-white;
+                  box-sizing: border-box;
+                  opacity: 0.5;
+                  &.onGroup {
+                    font-weight: bold;
+                    opacity: 1 !important;
+                  }
+
+                  @for $i from 0 through $group-count - 1 {
+                    &.circle-menu-#{$i} {
+                      transform:  rotate($group-angle * $i)
+                        translate(0,-75px)
+                        rotate(-$group-angle * $i);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .group-right {
+        grid-area: right;
+        min-width: 250px;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          height: 100%;
+          max-height: 300px;
+        }
+      }
+    }
+  }
+}
+
+// @media screen and (max-width: 900px) {
+//   .wrapper {
+//     .group-content-box {
+//       .group-content {
+//         gap: 5%;
+//         .group-left {
+//           width: 40%;
+//           min-width: 200px;
+//           .group-left-content {
+//             padding-left: 5%;
+//             .group-name {
+//               font-size: 30px;
+//             }
+//             .group-intro {
+//               font-size: 16px;
+//             }
+//             .group-learn {
+//               font-size: 16px;
+//             }
+//           }
+//         }
+//         .group-controller-box {
+//           display: none;
+//         }
+//         .group-right {
+//           width: 40%;
+//           img {
+//             width: 100%;
+//             max-width: 200px;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+
+// @media screen and (max-width: 500px) {
+//   .wrapper {
+//     .group-content-box {
+//       .group-content {
+//         flex-direction: column-reverse;
+//         .group-left {
+//           width: 100%;
+//           .group-left-content {
+//             padding-left: 5%;
+//             .group-name {
+//               font-size: 30px;
+//             }
+//             .group-intro {
+//               font-size: 16px;
+//             }
+//             .group-learn {
+//               font-size: 16px;
+//             }
+//           }
+//         }
+//         .group-controller-box {
+//           display: none;
+//         }
+//         .group-right {
+//           width: 100%;
+//           img {
+//             width: 100%;
+//             max-width: 200px;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+
+

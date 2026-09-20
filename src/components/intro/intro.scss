@@ -1,0 +1,165 @@
+@import "../../styles/base.scss";
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar { 
+  width: 0 !important 
+}
+
+img {
+  padding: 0;
+  margin: 0;
+}
+
+//  cards
+.intro-card-father {
+  flex-wrap: wrap;
+  margin: 10px 15px;
+  @media (min-width: 768px) {
+    margin: 15px 20px;
+  }
+  @media (min-width: 1024px) {
+    margin: 20px 30px;
+  }
+  min-width: calc(170 / 1280) * 100vw;
+}
+.intro-card-father:hover .intro-content {
+  @include transingle(rotateY(0deg));
+}
+.intro-card {
+  max-width: calc(170 / 1280) * 100vw;
+  min-width: 150px;
+  min-height: calc(190 / 700) * 100vh;
+  background-color: $introCard-grey;
+  border-radius: 35px;
+  font-weight: 550;
+
+  @include transingle(rotateY(0deg));
+  transition: all 0.5s ease-in-out 0s;
+  -moz-transition: all 0.5s ease-in-out 0s;
+  -webkit-transition: all 0.5s ease-in-out 0s;
+  -o-transition: all 0.5s ease-in-out 0s;
+}
+.intro-photo {
+  display: block;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  top: 25px;
+  left: 50%;
+  @include transingle(translateX(-50%));
+  background-size: contain;
+  background-color: #fff;
+  img {
+    width: auto;
+    height: 100%;
+  }
+}
+.intro-position {
+  font-size: smaller;
+  display: inline-block;
+  position: relative;
+  top: 10px;
+  left: 20px;
+  min-width: 45px;
+  height: 20px;
+  background-color: rgb(253, 172, 31);
+  color: white;
+  border-radius: 135px;
+  text-align: center;
+}
+.intro-name {
+  margin-left: 20%;
+  margin-top: 25px;
+}
+.intro-tag {
+  margin-left: 20%;
+}
+.intro-content {
+  border-radius: 35px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  @include transingle(rotateY(90deg));
+  transition: all 0.5s ease-in-out 0s;
+  font-size: 13px;
+}
+.intro-words-container {
+  padding: 7% 5%;
+}
+.intro-words {
+  width: 41.7%;
+  height: 23.4%;
+  background-color: rgb(253, 172, 31);
+  color: $txt-white;
+  border-radius: 135px;
+  margin: 8% auto;
+  font-size: 16px;
+}
+
+//  controller
+.intro-controller {
+  position: absolute;
+  bottom: calc(10 / 700) * 100vh;
+  right: 0;
+  margin-top: calc(66 / 700) * 100vh;
+  background-image: url("http://static.muxixyz.com/index_site/member-tab-background-pic.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: calc(89 / 700) * 100vh;
+  width: 100%;
+}
+.intro-tags {
+  display: flex;
+  width: 100%;
+}
+ul {
+  height: calc(89 / 700) * 100vh;
+  padding-top: 2vh;
+}
+li {
+  list-style: none;
+  text-align: center;
+  width: 20%;
+  line-height: calc(70 / 700) * 100vh;
+}
+li > a {
+  font-size: 15px;
+  @media (min-width: 768px) {
+    font-size: 20px;
+  }
+  @media (min-width: 1024px) {
+    font-size: 20px;
+  }
+  cursor: pointer;
+}
+li > .onTag {
+  font-weight: 600;
+  font-size: 20px;
+  @media (min-width: 768px) {
+    font-size: 25px;
+  }
+  @media (min-width: 1024px) {
+    font-size: 25px;
+  }
+  color: rgb(250, 174, 28);
+  text-shadow: 2px 2px 6px rgb(250, 174, 28), -1px -1px #fff, 1px -1px #444;
+}
+
+//intro.tsx
+.intro-card-containner {
+  overflow-y: scroll;
+  overflow-x: clip;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
