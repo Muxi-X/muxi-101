@@ -1,32 +1,49 @@
 import Link from 'next/link'
+import First from '@/components/first/first'
+
+const sections = [
+  { id: 'home', label: '首页' },
+  { id: 'products', label: '产品', title: '产品展示', description: '了解木犀团队正在做的产品。' },
+  { id: 'groups', label: '组别', title: '组别介绍', description: '认识团队里的不同组别。' },
+  {
+    id: 'blogs',
+    label: '博客',
+    title: '优质博客',
+    description: '阅读木犀团队的技术分享与思考。',
+    route: '/blog',
+  },
+  { id: 'join', label: '加入', title: '加入我们', description: '和我们一起做点有意思的事。' },
+]
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-16">
-      <section className="w-full rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500">Muxi 101</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950 md:text-5xl">
-          快速在几个页面之间跳转
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
-          从这里进入博客页或指南页，页面之间都能直接互相返回，适合做一个最简单的站内导航入口。
-        </p>
+    <main className="home">
+      <nav className="home-pagination" aria-label="首页分页">
+        {sections.map((section) => (
+          <a key={section.id} href={`#${section.id}`} aria-label={`跳转到${section.label}`}>
+            <span />
+          </a>
+        ))}
+      </nav>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/blog"
-            className="inline-flex items-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
-          >
-            去博客页
-          </Link>
-          <Link
-            href="/guide"
-            className="inline-flex items-center rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-950"
-          >
-            去指南页
-          </Link>
-        </div>
+      <section id="home" className="home-section home-hero">
+        <First />
       </section>
+
+      {sections.slice(1).map((section) => (
+        <section id={section.id} className="home-section home-preview" key={section.id}>
+          <div className="home-preview-content">
+            <p className="home-section-label">{section.label}</p>
+            <h2>{section.title}</h2>
+            <p>{section.description}</p>
+            {section.route ? (
+              <Link href={section.route}>查看博客</Link>
+            ) : (
+              <span className="home-preview-coming-soon">页面迁移中</span>
+            )}
+          </div>
+        </section>
+      ))}
     </main>
   )
 }

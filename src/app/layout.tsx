@@ -1,6 +1,9 @@
 import 'nextra-theme-docs/style.css'
 
 import './globals.css'
+import '../styles/home.scss'
+import '../components/first/first.scss'
+import '../components/first/studio-mark.scss'
 
 export const metadata = {
   // Define your metadata here

@@ -1,0 +1,324 @@
+.studio-stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1442px;
+  height: 906px;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.studio-wordmark,
+.studio-blocks,
+.studio-blooms,
+.studio-hits {
+  position: absolute;
+  inset: 0;
+}
+
+.studio-wordmark {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.studio-letter {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.studio-block,
+.studio-bloom {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.studio-block.is-on {
+  opacity: 1;
+}
+
+.studio-U {
+  transform-origin: 50% 100%;
+}
+
+.studio-I {
+  transform-origin: 50% 50%;
+}
+
+.studio-T {
+  transform-origin: 0 50%;
+}
+
+.studio-O {
+  transform-origin: 50% 50%;
+  border-radius: 50%;
+}
+
+.studio-block.studio-U.is-on {
+  animation: studio-fill 0.56s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.studio-block.studio-I.is-on {
+  animation: studio-spread 0.48s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.studio-block.studio-T.is-on {
+  animation: studio-wipe 0.44s cubic-bezier(0.2, 0.62, 0.36, 1) both;
+}
+
+.studio-block.studio-O.is-on {
+  animation: studio-pop 0.52s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.studio-letter.is-press {
+  animation: studio-press 0.3s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+.studio-bloom.is-on {
+  animation: studio-bloom-y 0.7s cubic-bezier(0.16, 0.84, 0.3, 1) both;
+}
+
+.studio-bloom.studio-T.is-on {
+  animation-name: studio-bloom-x;
+}
+
+.studio-bloom.studio-O.is-on {
+  animation-name: studio-bloom-scale;
+}
+
+.studio-hit {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.studio-hit:focus-visible {
+  outline: 2px solid #0076ff;
+  outline-offset: 6px;
+  border-radius: 6px;
+}
+
+.studio-hit-U {
+  left: 220px;
+  top: 400px;
+  width: 170px;
+  height: 470px;
+}
+
+.studio-hit-I {
+  left: 490px;
+  top: 400px;
+  width: 120px;
+  height: 470px;
+}
+
+.studio-hit-T {
+  left: 730px;
+  top: 400px;
+  width: 220px;
+  height: 470px;
+}
+
+.studio-hit-O {
+  left: 1150px;
+  top: 400px;
+  width: 270px;
+  height: 470px;
+}
+
+@keyframes studio-fill {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  46% {
+    transform: scaleY(1.07);
+  }
+
+  68% {
+    transform: scaleY(0.975);
+  }
+
+  85% {
+    transform: scaleY(1.008);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes studio-spread {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  46% {
+    transform: scaleY(1.09);
+  }
+
+  68% {
+    transform: scaleY(0.972);
+  }
+
+  85% {
+    transform: scaleY(1.01);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes studio-wipe {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  46% {
+    transform: scaleX(1.06);
+  }
+
+  68% {
+    transform: scaleX(0.98);
+  }
+
+  85% {
+    transform: scaleX(1.006);
+  }
+
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes studio-pop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  46% {
+    transform: scale(1.07);
+  }
+
+  68% {
+    transform: scale(0.975);
+  }
+
+  85% {
+    transform: scale(1.008);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes studio-press {
+  0% {
+    transform: translateY(0);
+  }
+
+  26% {
+    transform: translateY(-2.2px);
+  }
+
+  58% {
+    transform: translateY(0.5px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes studio-bloom-y {
+  0% {
+    transform: scaleY(1);
+    opacity: 0.62;
+  }
+
+  50% {
+    opacity: 0.46;
+  }
+
+  100% {
+    transform: scaleY(1.22);
+    opacity: 0;
+  }
+}
+
+@keyframes studio-bloom-x {
+  0% {
+    transform: scaleX(1);
+    opacity: 0.62;
+  }
+
+  50% {
+    opacity: 0.46;
+  }
+
+  100% {
+    transform: scaleX(1.16);
+    opacity: 0;
+  }
+}
+
+@keyframes studio-bloom-scale {
+  0% {
+    transform: scale(1);
+    opacity: 0.62;
+  }
+
+  50% {
+    opacity: 0.46;
+  }
+
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-block.is-on {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .studio-bloom.is-on,
+  .studio-letter.is-press {
+    animation: none;
+  }
+}

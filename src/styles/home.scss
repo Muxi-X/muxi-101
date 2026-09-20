@@ -1,0 +1,122 @@
+$home-orange: #faae1c;
+$home-ink: #3d3d3d;
+
+.home {
+  height: 100svh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  background: #ffffff;
+}
+
+.home-section {
+  position: relative;
+  min-height: 100svh;
+  scroll-snap-align: start;
+}
+
+.home-hero {
+  height: 100svh;
+}
+
+.home-pagination {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateY(-50%);
+}
+
+.home-pagination a {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+}
+
+.home-pagination span {
+  width: 6px;
+  height: 6px;
+  border: 1px solid $home-ink;
+  border-radius: 50%;
+  transition: 0.2s ease;
+}
+
+.home-pagination a:hover span,
+.home-pagination a:focus-visible span {
+  width: 10px;
+  height: 10px;
+  background: $home-orange;
+  border-color: $home-orange;
+}
+
+.home-preview {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  background: #f7f7f5;
+}
+
+.home-preview:nth-of-type(odd) {
+  background: #ffffff;
+}
+
+.home-preview-content {
+  width: min(520px, 100%);
+  text-align: center;
+  color: $home-ink;
+}
+
+.home-section-label {
+  margin: 0 0 20px;
+  color: $home-orange;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+}
+
+.home-preview h2 {
+  margin: 0;
+  font-size: clamp(40px, 7vw, 80px);
+  font-weight: 700;
+}
+
+.home-preview-content>p:not(.home-section-label) {
+  margin: 22px 0 30px;
+  font-size: 16px;
+}
+
+.home-preview-content a {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid $home-ink;
+  border-radius: 999px;
+  color: $home-ink;
+  font-size: 14px;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.home-preview-content a:hover,
+.home-preview-content a:focus-visible {
+  background: $home-ink;
+  color: #ffffff;
+}
+
+.home-preview-coming-soon {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid #b8b8b8;
+  border-radius: 999px;
+  color: #8a8a8a;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .home-pagination {
+    right: 12px;
+  }
+}
