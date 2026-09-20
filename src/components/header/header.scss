@@ -1,0 +1,113 @@
+@import "../../styles/color.scss";
+
+$header-tag-width: 70px;
+$header-wrap-width: $header-tag-width * 5 + 30px;
+$header-border-width: 30px;
+$header-border-left: $header-border-width * 1.6;
+
+header {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+  .header-wrap {
+    // width: $header-wrap-width;
+    @media (min-width: 768px) {
+      $header-tag-width: 120px;
+      $header-wrap-width: $header-tag-width * 5;
+      width: $header-wrap-width;
+    }
+  
+    @media (min-width: 1024px) {
+      $header-tag-width: 150px;
+      $header-wrap-width: $header-tag-width * 5;
+      width: $header-wrap-width;
+    }
+  }
+
+  @mixin header-tag() {
+    width: $header-tag-width;
+    display: inline-block;
+    font-size: 16px;
+    text-align: center;
+    position: relative;
+    vertical-align: top;
+
+    @media (min-width: 768px) {
+      $header-tag-width: 120px;
+      width: $header-tag-width;
+      font-size: 18px;
+    }
+  
+    @media (min-width: 1024px) {
+      $header-tag-width: 150px;
+      width: $header-tag-width;
+      font-size: 20px;
+    }
+
+  }
+
+  @mixin header-tail() {
+    // &:before {
+    //   position: absolute;
+    //   top: 0px;
+    //   left: $header-border-left;
+    //   content: "";
+    //   width: $header-border-width;
+    //   height: 0px;
+      border-top: 10px $header-border-color solid;
+    //   box-sizing: border-box;
+    // }
+  }
+
+  .header-primary {
+    @include header-tag();
+    height: 60px;
+
+    &:hover {
+      color: $txt-yellow-color;
+      cursor: pointer;
+      @include header-tail();
+    }
+  }
+
+  .header-center {
+    @include header-tag();
+    height: 90px;
+    background: no-repeat center;
+    background-size: 24%;
+    background-image: url("../../image/logo.png");
+
+    &:before {
+      position: absolute;
+      top: 0px;
+      left: $header-border-left;
+      content: "";
+      width: $header-border-width;
+    }
+  }
+
+  .header-word {
+    position: absolute;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .team-name {
+    font-weight: 200;
+  }
+
+  .header-active {
+    color: $txt-yellow-color;
+    @include header-tail();
+  }
+
+}

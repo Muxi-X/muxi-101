@@ -1,0 +1,47 @@
+@import "../../styles/base.scss";
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.join-web {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.join-word {
+  line-height: calc(34 / 700) * 100vh;
+  font-size: calc(18 / 1280) * 100vw;
+  position: absolute;
+  top: calc(155 / 700) * 100vh;
+  left: calc(122 / 1280) * 100vw;
+}
+.background-img-container{
+  margin-top: 5vh;
+}
+.background-star {
+  min-width: 300px ;
+  max-width: 400px ;
+  @media (min-width: 768px) {
+    max-width: 600px;
+  }
+  @media (min-width: 1024px) {
+    max-width: 800px;
+  }
+}
+.background-button-container {
+  width: 150px;
+  height: 100px;
+  margin: 10vh;
+  @media (min-width: 768px) {
+    width: 200px;
+    height: 120px;
+  }
+  @media (min-width: 1024px) {
+    width: 250px;
+    height: 150px;
+  }
+}
+.background-button-inner {
+  width: 100%;
+}
