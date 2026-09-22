@@ -1,5 +1,8 @@
 import type { NextConfig } from 'next'
+import nextra from 'nextra'
 
-const nextConfig: NextConfig = {}
+const withNextra = nextra({})
+
+const nextConfig: NextConfig = withNextra({})
 
 export default nextConfig

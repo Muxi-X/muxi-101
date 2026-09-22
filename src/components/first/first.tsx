@@ -1,63 +1,48 @@
-"use client";
+'use client'
 
-import React from "react";
-import Link from "next/link";
-import "./first.scss";
+import StudioMark from './studio-mark'
+
+const assetBase = '/mengbanzu/'
+
+const characters = [
+  { className: 'character-1', file: '蒙版组 1.svg', alt: '人物素材 1' },
+  { className: 'character-2', file: '蒙版组 2.svg', alt: '人物素材 2' },
+  { className: 'character-3', file: '蒙版组 3.svg', alt: '人物素材 3' },
+  { className: 'character-4', file: '蒙版组 4.svg', alt: '人物素材 4' },
+  { className: 'character-5', file: '蒙版组 5 (1).svg', alt: '人物素材 5' },
+]
 
 export default function First() {
-	return (
-		<div className="first">
-			<div className="first-center-words"> </div>
-			<div className="first-center-trees-containner">
-				<div className="first-center-gray-trees" />
-				<div className="first-center-green-trees" />
-				<div className="first-bottom-prond" />
-			</div>
+  const scrollToSection = (sectionId: string) => {
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    document.getElementById(sectionId)?.scrollIntoView({ behavior })
+  }
 
-			<div className="first-cloud-cantainner">
-				<div className="first-left-cloud" />
-				<div className="first-right-cloud" />
-			</div>
-			<div className="first-others">
-				<div className="first-top-cloud" />
-				<div className="first-top-stars" />
-
-				<div className="first-border" />
-			</div>
-			<div className="first-button">
-				<Link href="/intro">
-					<button className="blob-btn">
-						进&nbsp;入&nbsp;官&nbsp;网
-						<span className="blob-btn__inner">
-							<span className="blob-btn__blobs">
-								<span className="blob-btn__blob" />
-								<span className="blob-btn__blob" />
-								<span className="blob-btn__blob" />
-								<span className="blob-btn__blob" />
-							</span>
-						</span>
-					</button>
-				</Link>
-				<br />
-				<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-					<defs>
-						<filter id="goo">
-							<feGaussianBlur
-								in="SourceGraphic"
-								result="blur"
-								stdDeviation="10"
-							/>
-							<feColorMatrix
-								in="blur"
-								mode="matrix"
-								values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 21 -7"
-								result="goo"
-							/>
-							<feBlend in2="goo" in="SourceGraphic" result="mix" />
-						</filter>
-					</defs>
-				</svg>
-			</div>
-		</div>
-	);
+  return (
+    <div className="first">
+      <div className="first-top-nav-wrap">
+        <nav className="first-top-nav" aria-label="首页导航">
+          <button type="button" onClick={() => scrollToSection('products')}>
+            产品展示
+          </button>
+          <button type="button" onClick={() => scrollToSection('groups')}>
+            组别介绍
+          </button>
+          <button type="button" onClick={() => scrollToSection('blogs')}>
+            优质博客
+          </button>
+          <button type="button" onClick={() => scrollToSection('join')}>
+            加入我们
+          </button>
+        </nav>
+      </div>
+      <div className="first-logo" role="img" aria-label="木犀 Logo" />
+      <div className="first-brand-name">MUXI STUDIO</div>
+      <img className="first-container-icon" src="/nav/容器.svg" alt="" aria-hidden="true" />
+      {characters.map(({ className, file, alt }) => (
+        <img key={className} className={className} src={`${assetBase}${encodeURI(file)}`} alt={alt} />
+      ))}
+      <StudioMark />
+    </div>
+  )
 }
