@@ -6,8 +6,8 @@ import '../components/first/first.scss'
 import '../components/first/studio-mark.scss'
 
 export const metadata = {
-  // Define your metadata here
-  // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
+  title: '木犀团队官网',
+  description: '木犀团队产品、组别与技术博客。',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
