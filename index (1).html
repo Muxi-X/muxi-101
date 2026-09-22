@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木犀 · 我们的产品</title>
+<!--
+  设计还原：按 1440 × 900 设计稿 1:1 换算
+  字体：英文 Microsoft YaHei / 中文 思源黑体 Source Han Sans
+  素材：assets/phone.png（手机+插画）、icon1-4.png（桌面图标）、cursor.png（光标）
+-->
+<style>
+  :root {
+    --ink: #000;
+    --gray: #3d3d3d;
+    --font-en: "Microsoft YaHei", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-cn: "Source Han Sans SC", "Source Han Sans CN", "思源黑体", "Noto Sans CJK SC",
+               "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: #fff;
+    color: var(--gray);
+    font-family: var(--font-cn);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ 舞台：锁死 1440:900，等比缩放，1cqw = 舞台宽/100 ============ */
+  .product {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100svh;
+    background: #fff;
+  }
+
+  .stage {
+    --w: min(100vw, calc(100svh * 1.6));
+    width: var(--w);
+    height: calc(var(--w) / 1.6);   /* 1440 : 900 */
+    position: relative;
+    overflow: hidden;
+    container-type: size;
+    --u: calc(100vw / 1440);        /* 兜底：老浏览器按视口宽度换算 */
+  }
+  @supports (container-type: size) {
+    .stage { --u: calc(100cqw / 1440); }   /* 设计稿 1px */
+  }
+
+  /* ============ 手机 ============ */
+  /* 屏幕在素材里的位置：left 58 / top 56 / 宽 408（素材 534×967）
+     设计稿中屏幕 left 72、top 186 → 素材左上角落在 13 / 129 */
+  .device {
+    position: absolute;
+    left: calc(13 * var(--u));
+    top: calc(129 * var(--u));
+    width: calc(534 * var(--u));
+    filter: drop-shadow(0 calc(18 * var(--u)) calc(30 * var(--u)) rgba(0, 0, 0, .16));
+    animation: rise .95s cubic-bezier(.22, .8, .28, 1) both;
+  }
+  .device__img { display: block; width: 100%; height: auto; }
+
+  .screen {
+    position: absolute;
+    left: 10.86%;
+    top: 5.79%;
+    width: 76.40%;
+    aspect-ratio: 408 / 849;
+  }
+
+  /* 图标行：设计稿中图标 60px、间距 26px、距屏幕顶 86px */
+  .apps {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10.13%;              /* 86 / 849 */
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 6.37%;               /* 26 / 408 */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .apps__item {
+    width: 14.71%;            /* 60 / 408 */
+    aspect-ratio: 1;
+    animation: pop .5s cubic-bezier(.2, 1.35, .45, 1) both;
+  }
+  .apps__item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform .28s cubic-bezier(.2, .9, .3, 1);
+  }
+  .apps__item:hover img { transform: translateY(-8%) scale(1.06); }
+  .apps__item:nth-child(1) { animation-delay: .30s; }
+  .apps__item:nth-child(2) { animation-delay: .38s; }
+  .apps__item:nth-child(3) { animation-delay: .46s; }
+  .apps__item:nth-child(4) { animation-delay: .54s; }
+
+  /* ============ 交互：鼠标进入手机后，换成蓝色箭头光标 ============ */
+  .stage.is-live .device { cursor: none; }
+
+  .pointer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .18s ease;
+  }
+  .pointer.is-on { opacity: 1; }
+  .pointer img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(32 * var(--u));
+    height: auto;
+    /* 箭尖在素材的 27.27% / 0 处，负向偏移让箭尖正好落在鼠标点上 */
+    transform: translate(-27.27%, 0) scale(.92);
+    transition: transform .18s cubic-bezier(.2, 1.3, .5, 1);
+    filter: drop-shadow(0 calc(2 * var(--u)) calc(4 * var(--u)) rgba(30, 64, 190, .35));
+  }
+  .pointer.is-on img { transform: translate(-27.27%, 0) scale(1); }
+  .pointer.is-press img { transform: translate(-27.27%, 0) scale(.84); }
+
+  /* ============ 水面：手机屏幕上覆盖一层 WebGL 画布 ============ */
+  /* 画布内容 = 屏幕区域自身的壁纸裁切图，静止时与原图逐像素重合；
+     鼠标滑过时由 ripple.js 做真实的位移折射 + 波峰高光（见 assets/screen.png）。 */
+  .screen__gl {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  .screen__gl.is-ready { opacity: 1; }
+
+  /* 玻璃反光：跟随鼠标的柔光 */
+  .glow {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .3s ease;
+    background: radial-gradient(circle calc(130 * var(--u)) at var(--gx, 50%) var(--gy, 50%),
+      rgba(255, 255, 255, .13), rgba(255, 255, 255, .04) 52%, transparent 74%);
+  }
+  .screen.is-live .glow { opacity: 1; }
+
+
+  /* ============ 文案 ============ */
+  .copy { position: absolute; inset: 0; pointer-events: none; }
+  .copy > * {
+    position: absolute;
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .copy__title {
+    top: calc(46 * var(--u));
+    right: calc(64 * var(--u));
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: calc(97 * var(--u));
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    animation: fade-up .8s cubic-bezier(.22, .8, .28, 1) .10s both;
+  }
+  .copy__line {
+    right: calc(60 * var(--u));
+    font-size: calc(73 * var(--u));
+    color: var(--gray);
+  }
+  .copy__line--1 { top: calc(290 * var(--u)); animation: fade-up .8s cubic-bezier(.22, .8, .28, 1) .20s both; }
+  .copy__line--2 { top: calc(421 * var(--u)); animation: fade-up .8s cubic-bezier(.22, .8, .28, 1) .30s both; }
+
+  .copy__slogan {
+    top: calc(700 * var(--u));
+    right: calc(53 * var(--u));
+    font-size: calc(145 * var(--u));
+    color: var(--gray);
+    animation: fade-up .9s cubic-bezier(.22, .8, .28, 1) .40s both;
+  }
+
+  /* ============ 动画 ============ */
+  @keyframes rise      { from { opacity: 0; transform: translateY(calc(46 * var(--u))); } to { opacity: 1; transform: none; } }
+  @keyframes pop       { from { opacity: 0; transform: scale(.62); } to { opacity: 1; transform: none; } }
+  @keyframes fade-up   { from { opacity: 0; transform: translateY(calc(22 * var(--u))); } to { opacity: 1; transform: none; } }
+
+  /* ============ 窄屏：改为上下结构 ============ */
+  @media (max-width: 880px) {
+    .product { display: block; padding: 56px 22px 64px; }
+    .stage {
+      --u: min(1px, calc(100vw / 620));
+      width: 100%;
+      height: auto;
+      overflow: visible;
+      container-type: normal;
+    }
+    .device {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: calc(534 * var(--u));
+      margin: 0 auto 42px;
+    }
+    .copy { position: relative; inset: auto; text-align: right; }
+    .copy > * { position: relative; top: auto; right: auto; }
+    .copy__title {
+      font-size: clamp(38px, 13vw, 62px);
+      margin-bottom: clamp(16px, 5vw, 28px);
+    }
+    .copy__line { font-size: clamp(20px, 6.4vw, 30px); line-height: 1.5; }
+    .copy__line--1 { margin-bottom: clamp(4px, 1.6vw, 10px); }
+    .copy__line--2 { margin-bottom: clamp(26px, 9vw, 48px); }
+    .copy__slogan { font-size: clamp(46px, 16vw, 76px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<section class="product" aria-labelledby="product-title">
+  <div class="stage">
+
+    <div class="device">
+      <img class="device__img" src="assets/phone.png" width="534" height="967" alt="木犀 App 界面展示">
+      <div class="screen" aria-hidden="true">
+        <canvas class="screen__gl" width="408" height="849"></canvas>
+        <div class="glow"></div>
+        <ul class="apps">
+          <li class="apps__item"><img src="assets/icon1.png" width="60" height="60" alt=""></li>
+          <li class="apps__item"><img src="assets/icon2.png" width="60" height="60" alt=""></li>
+          <li class="apps__item"><img src="assets/icon3.png" width="60" height="60" alt=""></li>
+          <li class="apps__item"><img src="assets/icon4.png" width="60" height="60" alt=""></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pointer" aria-hidden="true"><img src="assets/cursor.png" width="33" height="37" alt=""></div>
+
+    <div class="copy">
+      <h2 class="copy__title" id="product-title">Our product</h2>
+      <p class="copy__line copy__line--1">这里是文案</p>
+      <p class="copy__line copy__line--2">这里也是文案</p>
+      <p class="copy__slogan">说点什么</p>
+    </div>
+
+  </div>
+</section>
+
+<script src="ripple.js"></script>
+<script>
+(function () {
+  var stage   = document.querySelector('.stage');
+  var device  = document.querySelector('.device');
+  var screen  = document.querySelector('.screen');
+  var pointer = document.querySelector('.pointer');
+  var surface = document.querySelector('.screen__gl');
+  var glow    = document.querySelector('.glow');
+  if (!stage || !device || !screen || !pointer) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  /* ---- 水面：WebGL 涟漪（位移折射 + 波峰高光）---- */
+  var ripple = null;
+  if (surface && window.MuxiRipple) {
+    ripple = window.MuxiRipple.create(surface, {
+      src: 'assets/screen.png',
+      fallbackScript: 'assets/screen-b64.js',   // file:// 离线打开时的内联贴图回退
+      onReady: function () { surface.classList.add('is-ready'); }
+    });
+    if (!ripple) surface.style.display = 'none';   // 不支持 WebGL2 时退回静态壁纸
+  }
+
+  var mx = 0, my = 0, raf = null;
+
+  function paint() {
+    raf = null;
+    pointer.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+  }
+  function requestPaint() {
+    if (raf === null) raf = requestAnimationFrame(paint);
+  }
+
+  device.addEventListener('pointerenter', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    mx = e.clientX; my = e.clientY; paint();
+    stage.classList.add('is-live');
+    pointer.classList.add('is-on');
+    if (ripple) ripple.spawnAtClient(e.clientX, e.clientY);   // 进场第一圈
+  });
+
+  device.addEventListener('pointerleave', function () {
+    stage.classList.remove('is-live');
+    screen.classList.remove('is-live');
+    pointer.classList.remove('is-on');
+  });
+
+  device.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    pointer.classList.add('is-press');
+  });
+  window.addEventListener('pointerup', function () { pointer.classList.remove('is-press'); });
+
+  window.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    mx = e.clientX; my = e.clientY;
+    requestPaint();
+    if (!stage.classList.contains('is-live')) return;
+
+    var r = screen.getBoundingClientRect();
+    var inside = e.clientX >= r.left && e.clientX <= r.right &&
+                 e.clientY >= r.top  && e.clientY <= r.bottom;
+    if (inside) {
+      glow.style.setProperty('--gx', (e.clientX - r.left).toFixed(1) + 'px');
+      glow.style.setProperty('--gy', (e.clientY - r.top).toFixed(1) + 'px');
+    }
+    screen.classList.toggle('is-live', inside);
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', function () {
+    pointer.classList.remove('is-on');
+    stage.classList.remove('is-live');
+    screen.classList.remove('is-live');
+  });
+})();
+</script>
+
+</body>
+</html>
