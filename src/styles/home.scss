@@ -9,6 +9,12 @@ $home-ink: #3d3d3d;
   background: #ffffff;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .home {
+    scroll-behavior: auto;
+  }
+}
+
 .home-section {
   position: relative;
   min-height: 100svh;

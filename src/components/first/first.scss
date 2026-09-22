@@ -9,23 +9,25 @@
   .first-top-nav-wrap {
     position: absolute;
     z-index: 50;
-    left: 115px;
+    left: 0;
+    right: 0;
     top: 8px;
-    width: 100%;
     height: 39px;
   }
 
   .first-top-nav {
-    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 57px;
     width: 100%;
     height: 39px;
     margin: 0;
-    padding: 0;
+    padding: 9px 3px 0 220px;
   }
 
   .first-top-nav button {
-    position: absolute;
-    top: 9px;
+    flex: 0 1 83.97px;
     width: 83.97px;
     height: 29px;
     margin: 0;
@@ -43,20 +45,7 @@
   }
 
   .first-top-nav button:nth-child(1) {
-    left: 814px;
     color: #9e9e9e;
-  }
-
-  .first-top-nav button:nth-child(2) {
-    left: 955.69px;
-  }
-
-  .first-top-nav button:nth-child(3) {
-    left: 1096.34px;
-  }
-
-  .first-top-nav button:nth-child(4) {
-    left: 1238.04px;
   }
 
   .first-top-nav button:hover,
@@ -67,6 +56,29 @@
   .first-top-nav button:focus-visible {
     outline: 2px solid #faae1c;
     outline-offset: -2px;
+  }
+
+  @media (max-width: 900px) {
+    .first-top-nav-wrap {
+      left: 16px;
+      right: 16px;
+      height: auto;
+    }
+
+    .first-top-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 16px;
+      height: auto;
+      padding: 9px 0 0;
+    }
+
+    .first-top-nav button {
+      width: 100%;
+      min-width: 0;
+      font-size: clamp(14px, 2.4vw, 20px);
+      text-align: center;
+    }
   }
 
   .first-logo {

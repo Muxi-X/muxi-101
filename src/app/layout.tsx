@@ -1,6 +1,6 @@
 import 'nextra-theme-docs/style.css'
 
-import './globals.css'
+import '../index.css'
 import '../styles/home.scss'
 import '../components/first/first.scss'
 import '../components/first/studio-mark.scss'
