@@ -165,7 +165,10 @@ function Intro() {
 
 				<p className="group-desc">{group.intro}</p>
 
-				<p className="group-quote">{group.quote}</p>
+				<p className="group-quote">
+					{group.quote.replace(/\n?”$/, "")}
+					{group.quote.endsWith("”") && <span className="quote-end">”</span>}
+				</p>
 
 				<button
 					className="group-link"
