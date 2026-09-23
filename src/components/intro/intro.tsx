@@ -7,7 +7,7 @@
 //
 // 数据全部来自 ./member：姓名 / 简介 / 头像外链沿用 info.ts 原样，
 // 其中安卓组已并入前端组（姓名带「（安卓）」后缀）。
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import groups from "./member";
 import type { MemberCard as MemberCardData } from "./member";
 import MemberCard from "./member-card";
@@ -104,8 +104,50 @@ function Intro() {
 		setGroupIndex((current) => (current + step + groups.length) % groups.length);
 	};
 
+	// 分隔线交点圆点：圆心要正好落在横竖两条线的交点上，并且要「随时跟着交点动」。
+	//   横线 = .group-nav 的 border-top（位置随上方文案占几行走）
+	//   竖线 = .panel-info 的 border-right（位置随左栏收窄而变）
+	//
+	// ⚠️ 横向不再"量了再摆"，改成把圆点挂进 .panel-info（见 intro.scss）：
+	//   圆心永远贴着左栏右缘，左栏宽度的过渡自然带着它一起走，同一帧、同一曲线，
+	//   结构上就不可能出现「交点先跑完、圆点再追上来」。
+	//   之前试过 ResizeObserver（时机在绘制之后，慢一帧，偏差涨到 49px）、
+	//   rAF 里写 CSS 变量（自定义属性要走一遍属性求值，仍差一帧）、
+	//   rAF 里直接写 left（仍差一帧）—— 都不如让它跟交点共用同一个过渡。
+	//
+	// 纵向仍是量出来的：横线的 y 只跟文案占几行有关，很少变，所以量一次就够，
+	// 另挂一个 ResizeObserver 兜住字体加载 / 换组导致的高度变化。
+	const stageRef = useRef<HTMLDivElement>(null);
+	useLayoutEffect(() => {
+		const el = stageRef.current;
+		if (!el) return;
+		const nav = el.querySelector(".group-nav");
+		if (!nav) return;
+
+		const measure = () => {
+			const stageBox = el.getBoundingClientRect();
+			const navBox = nav.getBoundingClientRect();
+			const borderTop = parseFloat(getComputedStyle(nav).borderTopWidth) || 0;
+			// 横线中点（相对画板顶边）
+			el.style.setProperty(
+				"--divider-y",
+				`${navBox.top - stageBox.top + borderTop / 2}px`,
+			);
+		};
+
+		measure(); // useLayoutEffect 在绘制前跑，首帧就在交点上
+		const observer = new ResizeObserver(measure);
+		observer.observe(nav);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [groupIndex, isMembers]);
+
 	return (
-		<div className={`stage${isMembers ? " is-members" : ""}`} onWheel={onWheel}>
+		<div
+			className={`stage${isMembers ? " is-members" : ""}`}
+			ref={stageRef}
+			onWheel={onWheel}
+		>
 			{/* ============ 左：组别信息 ============ */}
 			<section className="panel-info">
 				<h1 className="group-title">{group.en}</h1>
@@ -144,6 +186,18 @@ function Intro() {
 						))}
 					</ul>
 				</nav>
+
+				{/* 分隔线交点圆点：点击在「组别介绍 ⇄ 成员介绍」之间切换。
+				    ⚠️ 必须放在 .panel-info 里面：圆心靠 CSS 钉在左栏右缘，
+				    左栏宽度的过渡就自然带着它一起走（同一帧、同一曲线）。 */}
+				<button
+					className="divider-dot"
+					type="button"
+					aria-label={isMembers ? "返回组别介绍" : "查看成员"}
+					aria-controls="memberPanel"
+					aria-expanded={isMembers}
+					onClick={() => setIsMembers((open) => !open)}
+				/>
 			</section>
 
 			{/* ============ 右：竖排英文装饰 ============ */}
@@ -155,22 +209,25 @@ function Intro() {
 
 				<PanelWords />
 
+				{/* 组别角色立绘：与组名一一对应，摆在 CREATIVE / POWER 下方。
+				    ⚠️ 图上不带任何文字 —— index-1 的立绘本身就是纯画面，
+				    不要再往上面叠组名之类的字。 */}
+				{group.art ? (
+					<img
+						className="panel-char"
+						key={group.tag}
+						src={group.art}
+						alt={`${group.tag}组角色形象`}
+						draggable={false}
+					/>
+				) : null}
+
 				<div className="art-swatches">
 					<i className="sw-purple" />
 					<i className="sw-black" />
 					<i className="sw-yellow" />
 				</div>
 			</section>
-
-			{/* 分隔线交点圆点：点击在「组别介绍 ⇄ 成员介绍」之间切换 */}
-			<button
-				className="divider-dot"
-				type="button"
-				aria-label={isMembers ? "返回组别介绍" : "查看成员"}
-				aria-controls="memberPanel"
-				aria-expanded={isMembers}
-				onClick={() => setIsMembers((open) => !open)}
-			/>
 
 			{/* ============ 成员介绍：点「查看成员」后滑入 ============ */}
 			<section

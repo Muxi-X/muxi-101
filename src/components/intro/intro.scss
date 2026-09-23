@@ -278,6 +278,28 @@
     }
   }
 
+  /* 组别角色立绘：与组名一一对应，见 member.ts 的 ART。
+     ⚠️ 纯图，不叠任何文字（index-1 的立绘本身就没有字）。
+     ⚠️ PNG 已按「不透明外框」裁掉透明留白，contain 生效的才是人物本身的比例。
+     对齐要求：图片上缘贴竖排 CREATIVE 的顶边、下缘贴竖排 POWER 的底边，
+     横向在右栏居中。
+     实测两条基准（画板坐标）：CREATIVE 顶边 88.5、POWER 底边 841.2
+     → 盒子 top 88.5、高 752.7，正是这两条线之间那一整条。
+     横向铺满 496，靠 object-fit: contain 居中缩放，人物就落在两条竖排字的中间。 */
+  .panel-char {
+    position: absolute;
+    left: 0;
+    top: 5.53125rem; /* 88.5 —— = CREATIVE 顶边 */
+    z-index: 1; /* 压在两层竖排字之下，跟设计稿一样「字在人上」 */
+    width: 31rem; /* 496 —— 右栏整宽，contain 后自动居中 */
+    height: 47.04rem; /* 752.7 —— CREATIVE 顶边 → POWER 底边 */
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   /* 品牌色块 61 / 30 / 20，间距 7 */
   .art-swatches {
     position: absolute;
@@ -309,12 +331,22 @@
     }
   }
 
-  /* 横竖分隔线交点圆点（跟随左栏一起左移）
-     悬浮放大 + 外阴影；点击在「组别介绍 ⇄ 成员介绍」之间切换 */
+  /* 横竖分隔线交点圆点（.panel-info 的子元素，跟着左栏一起收窄）
+     悬浮放大 + 外阴影；点击在「组别介绍 ⇄ 成员介绍」之间切换。
+     ⚠️ 圆心必须落在横竖两条线的交点上，而且要「随时跟着交点动」：
+       · 横向：圆点是 .panel-info 的子元素，左栏宽度过渡会**带着它一起走**，
+         同一帧、同一条缓动曲线 —— 结构上就不可能出现「交点先动、圆点再追」。
+         （试过在组件里量了再摆：ResizeObserver 慢一帧、rAF 里写 left 也差一帧。）
+         ⚠️ left 的百分比是按**内容盒**解析的（不含那 5px 的 border-right），
+         所以偏移量要按「内容盒右缘 → 竖线中点」来算：
+         内容盒右缘 + 5px(border) − 2.5px(竖线中点) − 15px(半径) = 内容盒右缘 − 12.5px。
+         只写 calc(100% - 15px) 会整体右偏 2.5px。
+       · 纵向：top 用 --divider-y（横线实际中点，组件量出来后写在 .stage 上）再减半径。
+     只给 transform / box-shadow 留过渡，位置一律即时，hover 放大那下手感不受影响。 */
   .divider-dot {
     position: absolute;
-    left: 57.71875rem; /* 923.5 */
-    top: 26.96875rem; /* 431.5 */
+    left: calc(100% - 0.78125rem); /* 内容盒右缘 − 12.5px */
+    top: calc(var(--divider-y, 28.96875rem) - 0.9375rem); /* 横线中点 − 半径 15 */
     z-index: 5;
     width: 1.875rem; /* 30 */
     height: 1.875rem;
@@ -324,11 +356,9 @@
     background: var(--purple);
     cursor: pointer;
     transition:
-      left var(--dur) var(--ease),
       transform 0.26s var(--ease),
       box-shadow 0.26s var(--ease);
   }
-
   .divider-dot:hover,
   .divider-dot:focus-visible {
     transform: scale(1.34);
@@ -615,9 +645,10 @@
       left: 10.875rem; /* 944 → 174 */
     }
 
-    .divider-dot {
-      left: 8.71875rem; /* 923.5 → 139.5 */
-    }
+    /* ⚠️ 这里不要再写死 left —— 左栏收窄后竖线位置变了，圆点必须跟着走。
+       原来写死 139.5，结果圆心落在 154.5 而竖线在 157.5，差 3px 没对上。
+       现在完全交给 --divider-x（组件量的是 .panel-info 的实际右边），
+       所以成员态不需要任何覆盖。 */
 
     /* 组名：绕 D 顺时针 90°，字号放大 90%（1.9rem → 3.61rem）
        ⚠️ 不能照抄设计稿的 4.5rem：设计稿的组名是 Design（6 字母），站内有
