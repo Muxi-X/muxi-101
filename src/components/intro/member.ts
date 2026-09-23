@@ -34,8 +34,10 @@ export interface MemberGroup {
 	intro: string;
 	/** 组别引言（收尾引号单独一行，见 .quote-end） */
 	quote: string;
-	/** 右栏角色立绘（CREATIVE / POWER 下方那一个） */
+	/** 右栏角色立绘（竖排字中间那一个） */
 	art: string;
+	/** 右栏两行竖排英文：[左上那行, 右下那行] */
+	words: [string, string];
 	/** 成员列表 */
 	members: MemberCard[];
 }
@@ -46,9 +48,8 @@ const MERGE_TAG = "安卓";
 const MERGE_SUFFIX = "（安卓）";
 
 /**
- * 组名 → 右栏角色立绘（放在 CREATIVE / POWER 下方的那一个）。
- * ⚠️ 一组一个角色，五组一一对应：产品→第 1 个、运营→第 2 个、设计→第 3 个、
- *    前端→第 4 个、后端→第 5 个。图在 public/characters/ 下，走站内路径引用
+ * 组名 → 右栏角色立绘（两组竖排英文中间的那一个）。
+ * ⚠️ 一组一个角色，五组一一对应，图在 public/characters/ 下，走站内路径引用
  *    （不是 base64 内嵌）；以后传到 static.muxixyz.com，只把这里换成完整 URL 即可。
  */
 const ART: Record<string, string> = {
@@ -58,6 +59,24 @@ const ART: Record<string, string> = {
 	前端: "/characters/frontend.png",
 	后端: "/characters/backend.png",
 };
+
+/**
+ * 组名 → 右栏两行竖排英文：[左上那行, 右下那行]。
+ * 位置由 .word--creative / .word--power 两条规则决定（照设计稿量取）：
+ *   · [0] 落在左上（与 CREATIVE 同位）
+ *   · [1] 落在右下（与 POWER 同位）
+ * 换组时只换文字，位置不动。
+ * ⚠️ 设计组暂未给词，沿用设计稿原有的 CREATIVE / POWER；给了直接替换这两项即可。
+ */
+const WORDS: Record<string, [string, string]> = {
+	后端: ["ROBUST", "LOGICAL"],
+	前端: ["PRECISE", "SWIFT"],
+	产品: ["CLEAR", "INTUITIVE"],
+	运营: ["AGILE", "RELIABLE"],
+};
+
+/** 没配词的组（目前只有设计组）用设计稿原词兜底 */
+const WORDS_FALLBACK: [string, string] = ["CREATIVE", "POWER"];
 
 /** 组名 → 英文名 + 组别简介 / 引言 */
 const COPY: Record<string, { en: string; intro: string; quote: string }> = {
@@ -134,6 +153,7 @@ export function buildGroups(): MemberGroup[] {
 				intro: copy?.intro ?? "",
 				quote: copy?.quote ?? "",
 				art: ART[group.tag] ?? "",
+				words: WORDS[group.tag] ?? WORDS_FALLBACK,
 				members:
 					group.tag === MERGE_INTO ? [...group.people, ...androidCards] : group.people,
 			};

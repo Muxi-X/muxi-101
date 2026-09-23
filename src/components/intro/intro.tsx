@@ -639,7 +639,7 @@ function Intro() {
 					<i className="bar-black" />
 				</div>
 
-				<PanelWords />
+				<PanelWords words={group.words} />
 
 				{/* 组别角色立绘：与组名一一对应，摆在 CREATIVE / POWER 下方。
 				    ⚠️ 图上不带任何文字 —— index-1 的立绘本身就是纯画面，
