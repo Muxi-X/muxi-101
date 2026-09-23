@@ -1,4 +1,4 @@
-﻿// 成员介绍页的数据整理层
+// 成员介绍页的数据整理层
 //
 // 数据来源：./info —— 历届成员（照片 / 姓名 / 职务 / 简介），不改动任何原始内容。
 //
@@ -34,6 +34,8 @@ export interface MemberGroup {
 	intro: string;
 	/** 组别引言（收尾引号单独一行，见 .quote-end） */
 	quote: string;
+	/** 右栏角色立绘（CREATIVE / POWER 下方那一个） */
+	art: string;
 	/** 成员列表 */
 	members: MemberCard[];
 }
@@ -42,6 +44,20 @@ export interface MemberGroup {
 const MERGE_INTO = "前端";
 const MERGE_TAG = "安卓";
 const MERGE_SUFFIX = "（安卓）";
+
+/**
+ * 组名 → 右栏角色立绘（放在 CREATIVE / POWER 下方的那一个）。
+ * ⚠️ 一组一个角色，五组一一对应：产品→第 1 个、运营→第 2 个、设计→第 3 个、
+ *    前端→第 4 个、后端→第 5 个。图在 public/characters/ 下，走站内路径引用
+ *    （不是 base64 内嵌）；以后传到 static.muxixyz.com，只把这里换成完整 URL 即可。
+ */
+const ART: Record<string, string> = {
+	产品: "/characters/product.png",
+	运营: "/characters/operations.png",
+	设计: "/characters/design.png",
+	前端: "/characters/frontend.png",
+	后端: "/characters/backend.png",
+};
 
 /** 组名 → 英文名 + 组别简介 / 引言 */
 const COPY: Record<string, { en: string; intro: string; quote: string }> = {
@@ -73,9 +89,9 @@ const COPY: Record<string, { en: string; intro: string; quote: string }> = {
 	},
 	运营: {
 		en: "Operations",
-		intro: "负责团队内部的内容运营与品牌传播，追求有温度、可持续的社区氛围与影响力。",
+		intro: "负责团队内部的内容运营与活动策划，追求有温度的表达与可持续的增长。",
 		quote:
-			"“让好产品被更多人看见，让每一次发声都值得被记住。在这里，运营不是吆喝，而是把对的事讲给对的人听。\n”",
+			"“让好内容被更多人看见，让每次活动都留下痕迹。在这里，数据和创意从来不是对立的两面。\n”",
 	},
 };
 
@@ -117,6 +133,7 @@ export function buildGroups(): MemberGroup[] {
 				en: copy?.en ?? group.tag,
 				intro: copy?.intro ?? "",
 				quote: copy?.quote ?? "",
+				art: ART[group.tag] ?? "",
 				members:
 					group.tag === MERGE_INTO ? [...group.people, ...androidCards] : group.people,
 			};

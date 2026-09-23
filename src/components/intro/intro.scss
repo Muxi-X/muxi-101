@@ -34,6 +34,22 @@
   --ease-out-q: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-in-q: cubic-bezier(0.4, 0, 0.7, 0.2);
 
+  /* 组别文字切换（方向由 --txt-dir 驱动，见 .group-title .lt）
+     整段节奏 ≈800~920ms（短词 795ms / 最长词 Operations 919ms），与主面板位移的
+     --dur 780ms 同量级 —— 切换一组时「文字铺完」和「面板 / 立绘走完」一起收尾。
+     只动文字本身，不碰版式：位移量都是固定的 rem。 */
+  --txt-out: 0.2s; /* 单个字母 / 单块的出场时长 */
+  --txt-in: 0.4s; /* 入场时长（比出场长：进要稳，出要快） */
+  --txt-lt-shift: 1.375rem; /* 22 —— 标题字母的位移量 */
+  --txt-block-shift: 1.125rem; /* 18 —— 正文块的位移量 */
+  --txt-lt-out: 0.014s; /* 标题字母出场的阶梯间隔 */
+  --txt-lt-in: 0.017s; /* 标题字母入场的阶梯间隔 */
+  --txt-step: 0.05s; /* 正文 → 引言的级联间隔 */
+  --txt-lead: 0.04s; /* 正文相对标题的起步延迟 */
+  /* ⚠️ 方向必须有默认值：JS 只在切换时写它，若它「未定义」，
+     calc() 会算出非法值 → transform 无值 → 过渡失效、元素卡在位移上。 */
+  --txt-dir: 1;
+
   /* 立绘切换：出场淡出 → 入场擦除（先让旧人离开，新人再进） */
   --art-out: 0.16s;
   --art-move: 0.3s;
@@ -96,6 +112,23 @@
       transform var(--dur) var(--ease);
   }
 
+  /* 标题的文字载体（JS 换字动效拆的是它的子节点）。
+     ⚠️ 必须显式 inline-block 并原样继承字距 / 行高：inline 盒在块级 h1 里会多出一份
+     「strut」行盒指标（字体度量算出来的升降部），行高就比改动前高几个像素，会把
+     下方的简介整体推下去。inline-block 只用自己的行盒，行高与改动前一致。
+     ⚠️ width: max-content 是必需的，不是优化：成员页里 .panel-info 收窄到 160，
+     h1 的可用宽度只剩 115，而组名墨迹有 246~408 宽。inline-block 的自动宽度会被
+     可用宽度夹住（这里只有 63），组名就被折成两行 —— 开合面板那一秒多里字体还在
+     从 96 过渡到 57.76，正好卡在「夹得最狠、字还很大」的区间，于是左上角会看到
+     组名先变成竖排的两行、再恢复。max-content 让盒宽只由文字本身决定，
+     换组时逐字母拆开也不会再折行。 */
+  .group-title__text {
+    display: inline-block;
+    width: max-content;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
   /* 正文 / 引言：宽度同设计稿，保证一致的断行 */
   .group-desc,
   .group-quote {
@@ -113,6 +146,119 @@
   /* 收尾的引号单独占一行（跟设计稿一致） */
   .quote-end {
     display: block;
+  }
+
+  /* ------------------------------------------------------------------------
+     组别文字切换：标题逐字母级联 + 正文方向性淡入淡出
+     ------------------------------------------------------------------------
+     方向由 --txt-dir 决定：+1 = 看下一组（内容上移），-1 = 看上一组（内容下移），
+     0 = 跨首尾环绕（线性方向无意义 → 退化为纯淡入淡出），JS 只在 .stage 上写一个值，
+     标题字母和正文块一起继承。
+
+     为什么要拆字母：组名长短差异极大（Design 墨迹 334 ↔ Operations 535，差 202）。
+     整块淡入淡出时，眼睛会去比较前后两个宽度不同的色块 —— 这就是「文字相差大」的来源。
+     拆成字母各自进出后，长度差就不再是一个可以被看见的对象了。
+
+     为什么出场用 transition、入场用 animation：
+     · 出场用 transition：transition 的起点是**当前计算值**。快速连滚时上一个入场可能
+       只走到一半，transition 会从那个中间值接着走，不会闪回满透明度。
+     · 入场用 animation + fill-mode: backwards：延迟期间就停在 from 帧（= 起始态），
+       不需要「设起始帧 → 强制回流 → 摘掉」那套 hack；backwards 还保证动画结束后
+       属性回到基础态，不留残余 transform。
+     ⚠️ 入场必须同时把 transition 关掉（.is-in { transition: none }）：CSS 级联里
+       transition 优先级高于 animation，否则「从 .is-out 的 opacity: 0 回到基础态 opacity: 1」
+       会被一条过渡接管，入场动画直接失效。
+     ------------------------------------------------------------------------ */
+  .group-title .lt {
+    display: inline-block;
+    white-space: pre; /* 组名含空格时不会折行（当前各组都是单词） */
+    transition:
+      transform var(--txt-out) var(--ease-in-q),
+      opacity var(--txt-out) var(--ease-in-q);
+  }
+
+  /* 标题：只动字母，不动 .group-title 本身 —— 它的 transform 归成员页的旋转动效所有，
+     两套写在一起会互相覆盖（且 .stage.is-members 的特异性更高，出场会被吃掉）。 */
+  .group-title.is-out .lt {
+    transition-delay: calc(var(--i) * var(--txt-lt-out));
+    transform: translateY(calc(var(--txt-dir) * var(--txt-lt-shift) * -1));
+    opacity: 0;
+  }
+
+  @keyframes txtLtIn {
+    from {
+      transform: translateY(calc(var(--txt-dir) * var(--txt-lt-shift)));
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .group-title.is-in .lt {
+    transition: none;
+    /* ⚠️ 用长写而不是 `animation: txtLtIn var(--txt-in) var(--ease-out-q) backwards` 简写：
+       简写里带 var() 时整条声明是「待替换值」，构建期的 CSS 压缩会把它拆成一组空长写，
+       动画名和时长的计算值全变成空 —— 动画直接不生效。长写不经过这层拆分。 */
+    animation-name: txtLtIn;
+    animation-duration: var(--txt-in);
+    animation-timing-function: var(--ease-out-q);
+    animation-fill-mode: backwards;
+    animation-delay: calc(var(--txt-lead) + var(--i) * var(--txt-lt-in));
+  }
+
+  /* 正文 / 引言：同一套方向语言，按 --o 依次铺开（标题 → 正文 → 引言） */
+  .group-desc {
+    --o: 0;
+  }
+
+  .group-quote {
+    --o: 1;
+  }
+
+  .group-desc.is-out,
+  .group-quote.is-out {
+    transition:
+      transform var(--txt-out) var(--ease-in-q) calc(var(--txt-lead) + var(--o) * var(--txt-step)),
+      opacity var(--txt-out) var(--ease-in-q) calc(var(--txt-lead) + var(--o) * var(--txt-step));
+    transform: translateY(calc(var(--txt-dir) * var(--txt-block-shift) * -1));
+    opacity: 0;
+  }
+
+  @keyframes txtBlkIn {
+    from {
+      transform: translateY(calc(var(--txt-dir) * var(--txt-block-shift)));
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .group-desc.is-in,
+  .group-quote.is-in {
+    transition: none;
+    /* 同 .group-title.is-in .lt：带 var() 的 animation 简写会被拆成空长写，必须用长写 */
+    animation-name: txtBlkIn;
+    animation-duration: var(--txt-in);
+    animation-timing-function: var(--ease-out-q);
+    animation-fill-mode: backwards;
+    animation-delay: calc(var(--txt-lead) + var(--o) * var(--txt-step));
+  }
+
+  /* ⚠️ 入场动画只在组别介绍页生效：成员页里正文本来就由 .is-members 压到 opacity: 0，
+     而 animation 在级联里优先于普通声明，终帧的 opacity: 1 会盖过它 ——
+     等于让本该隐藏的文字闪出来。
+     只中和 animation 这一个来源：不能顺手把 transition / opacity 也写掉，
+     否则要么废掉成员页自己的淡出，要么以更高特异性反过来压掉 opacity: 0。
+     标题字母不受影响 —— 它在成员页是可见的（竖排组名），本来就该有切换动效。 */
+  &.is-members .group-desc.is-in,
+  &.is-members .group-quote.is-in {
+    animation: none;
   }
 
   .group-link {
@@ -278,6 +424,30 @@
     }
   }
 
+  /* 组别角色立绘：与组名一一对应，见 member.ts 的 ART。
+     ⚠️ 纯图，不叠任何文字（index-1 的立绘本身就没有字）。
+     ⚠️ PNG 已按「不透明外框」裁掉透明留白，contain 生效的才是人物本身的比例。
+     对齐要求：图片上缘贴竖排 CREATIVE 的顶边、下缘贴竖排 POWER 的底边，
+     横向在右栏居中。
+     实测两条基准（画板坐标）：CREATIVE 顶边 88.5、POWER 底边 841.2
+     → 盒子 top 88.5、高 752.7，正是这两条线之间那一整条。
+     横向铺满 496，靠 object-fit: contain 居中缩放，人物就落在两条竖排字的中间。
+     单位用 rem：画板本身是 1440×900 的固定坐标系（外面由 transform: scale 缩放），
+     1rem = 16 画板像素，跟同文件其他尺寸一致。 */
+  .panel-char {
+    position: absolute;
+    left: 0;
+    top: 5.53125rem; /* 88.5 —— = CREATIVE 顶边 */
+    z-index: 1; /* 压在两层竖排字之下，跟设计稿一样「字在人上」 */
+    width: 31rem; /* 496 —— 右栏整宽，contain 后自动居中 */
+    height: 47.04rem; /* 752.7 —— CREATIVE 顶边 → POWER 底边 */
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   /* 品牌色块 61 / 30 / 20，间距 7 */
   .art-swatches {
     position: absolute;
@@ -310,11 +480,22 @@
   }
 
   /* 横竖分隔线交点圆点（跟随左栏一起左移）
-     悬浮放大 + 外阴影；点击在「组别介绍 ⇄ 成员介绍」之间切换 */
+     悬浮放大 + 外阴影；点击在「组别介绍 ⇄ 成员介绍」之间切换。
+
+     圆心必须落在「竖线（.panel-info 的 border-right）中线 × 横线（.group-nav 的
+     border-top）中线」这个交点上。横向的刻度尺是**包含块的 padding box**：
+     绝对定位的百分比 left 解析的是包含块 padding box 的宽度，而 .panel-info 是
+     `width: 59rem + border-right: 5px + box-sizing: border-box`，
+     所以 `100%` = 939 = **竖线的左缘**，不是竖线中线。
+       交点横坐标 = 100% + 2.5（半个线宽）
+       圆心横坐标 = 交点 − 15（半径）= 100% + 2.5 − 15 = 100% − 12.5 = 100% − 0.78125rem
+     ⚠️ 实测（probe 量到 100% = 155 画板像素 = 160 − 5）：
+       写成 `calc(100% - 0.78125rem + 0.3125rem)` 会让圆心正好偏右整整一条线宽（5px），
+       这就是「圆心没落在交点上」的原因。别再加那 5px。 */
   .divider-dot {
     position: absolute;
-    left: 57.71875rem; /* 923.5 */
-    top: 26.96875rem; /* 431.5 */
+    left: calc(100% - 0.78125rem); /* 竖线中线 − 半径 15 */
+    top: calc(var(--divider-y, 28.96875rem) - 0.9375rem); /* 横线中线 − 半径 15 */
     z-index: 5;
     width: 1.875rem; /* 30 */
     height: 1.875rem;
@@ -324,7 +505,6 @@
     background: var(--purple);
     cursor: pointer;
     transition:
-      left var(--dur) var(--ease),
       transform 0.26s var(--ease),
       box-shadow 0.26s var(--ease);
   }
@@ -603,6 +783,41 @@
     }
   }
 
+  /* 面板内部再分一层：标题 → 卡片 → 分页点 依次浮现（10px 极短位移 + 淡入）。
+     用 animation 而不是 transition —— .members-viewport 的 transition 被「换组淡出」占用，
+     若改用 transition-delay，成员页内换组也会跟着延迟。
+     animation 只在 .is-members 生效时播一次；换组重建卡片 DOM 不会重播（viewport 本身没换）。 */
+  @keyframes memberRise {
+    from {
+      opacity: 0;
+      transform: translateY(0.625rem); /* 10 */
+    }
+  }
+
+  &.is-members .members-title,
+  &.is-members .members-viewport,
+  &.is-members .members-dots {
+    /* 用 backwards 而非 both：结束后不留下 transform（否则 overflow: hidden 的视窗会多担一个
+       包含块，且恒占一个合成层）。from 的终点就是元素自然值，所以填不填看不出差别。
+       同 .group-title.is-in .lt：带 var() 的 animation 简写会被拆成空长写，必须用长写。 */
+    animation-name: memberRise;
+    animation-duration: 0.5s;
+    animation-timing-function: var(--ease-out-q);
+    animation-fill-mode: backwards;
+  }
+
+  &.is-members .members-title {
+    animation-delay: 0.14s;
+  }
+
+  &.is-members .members-viewport {
+    animation-delay: 0.23s;
+  }
+
+  &.is-members .members-dots {
+    animation-delay: 0.32s;
+  }
+
   /* ======================================================================
      交互后（.stage.is-members）
      ====================================================================== */
@@ -615,9 +830,10 @@
       left: 10.875rem; /* 944 → 174 */
     }
 
-    .divider-dot {
-      left: 8.71875rem; /* 923.5 → 139.5 */
-    }
+    /* ⚠️ 这里不要再写死 .divider-dot 的 left —— 左栏收窄后竖线位置变了，
+       圆点必须跟着走。原来写死 139.5（圆心 154.5）而竖线在 157.5，差 3px 没对上。
+       现在 left 用 calc(100% - 12.5px) 挂在 .panel-info 右缘上（见上面的规则），
+       左栏宽度的过渡会带着圆点一起走，所以成员态不需要任何覆盖。 */
 
     /* 组名：绕 D 顺时针 90°，字号放大 90%（1.9rem → 3.61rem）
        ⚠️ 不能照抄设计稿的 4.5rem：设计稿的组名是 Design（6 字母），站内有
@@ -671,6 +887,24 @@
     .panel-members,
     .members-track {
       transition-duration: 0.01ms !important;
+      transition-delay: 0s !important; /* 连错峰等待也免掉，直接到位 */
+    }
+
+    /* 面板内部错峰浮现同样关掉（animation 不受 transition-duration 影响） */
+    &.is-members .members-title,
+    &.is-members .members-viewport,
+    &.is-members .members-dots {
+      animation: none !important;
+    }
+
+    /* 组别文字切换：字母与正文块直接到位，连阶梯等待也免掉。
+       位移本身保留 —— 它是「内容换了一组」的状态提示，不是装饰动效。 */
+    .group-title .lt,
+    .group-desc,
+    .group-quote {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+      animation-duration: 0.01ms !important;
     }
   }
 }
