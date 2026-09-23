@@ -25,6 +25,15 @@ $home-ink: #3d3d3d;
   height: 100svh;
 }
 
+.home-member {
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
 .home-pagination {
   position: fixed;
   z-index: 50;

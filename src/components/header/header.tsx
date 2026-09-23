@@ -29,11 +29,6 @@ const Header: React.FC = () => {
 			route: "/",
 		},
 		{
-			name: "成员介绍",
-			style: "header-primary",
-			route: "/member",
-		},
-		{
 			name: "加入我们",
 			style: "header-primary",
 			route: "/join",
