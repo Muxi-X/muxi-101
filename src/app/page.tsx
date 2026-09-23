@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import First from '@/components/first/first'
+import Intro from '@/components/intro/intro'
 
 const sections = [
   { id: 'home', label: '首页' },
@@ -30,20 +31,26 @@ export default function Home() {
         <First />
       </section>
 
-      {sections.slice(1).map((section) => (
-        <section id={section.id} className="home-section home-preview" key={section.id}>
-          <div className="home-preview-content">
-            <p className="home-section-label">{section.label}</p>
-            <h2>{section.title}</h2>
-            <p>{section.description}</p>
-            {section.route ? (
-              <Link href={section.route}>查看博客</Link>
-            ) : (
-              <span className="home-preview-coming-soon">页面迁移中</span>
-            )}
-          </div>
-        </section>
-      ))}
+      {sections.slice(1).map((section) =>
+        section.id === 'groups' ? (
+          <section id={section.id} className="home-section home-member" key={section.id}>
+            <Intro />
+          </section>
+        ) : (
+          <section id={section.id} className="home-section home-preview" key={section.id}>
+            <div className="home-preview-content">
+              <p className="home-section-label">{section.label}</p>
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+              {section.route ? (
+                <Link href={section.route}>查看博客</Link>
+              ) : (
+                <span className="home-preview-coming-soon">页面迁移中</span>
+              )}
+            </div>
+          </section>
+        ),
+      )}
     </main>
   )
 }

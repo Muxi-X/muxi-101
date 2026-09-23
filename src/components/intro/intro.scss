@@ -1,165 +1,676 @@
-@import "../../styles/base.scss";
-html {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-html::-webkit-scrollbar { 
-  width: 0 !important 
-}
+/* ==========================================================================
+   木犀工作室 · 组别 / 成员介绍页
+   --------------------------------------------------------------------------
+   版式基准：1440 × 900（html 字号 = min(100vw/1440, 100vh/900) × 16，整块画板
+   随视口等比缩放，1rem = 1 设计像素）。
+   色板：#000000｜#3D3D3D｜#3D3D3D 50%｜#7322FF｜#FFEA00｜#D8D8D8｜#66ADFF
+   交互：点「查看成员」→ 组名绕 D 顺时针转 90°、简介淡出、主视觉左移、
+         竖分隔线随左栏收窄左移，右侧滑入「成员介绍」面板。
+   所有规则都收在 .stage 下，避免影响站内其他页面。
+   ========================================================================== */
 
-img {
-  padding: 0;
-  margin: 0;
-}
+.stage {
+  --black: #000000;
+  --ink: #3d3d3d;
+  --ink-50: rgba(61, 61, 61, 0.5);
+  --purple: #7322ff;
+  --yellow: #ffea00;
+  --line: #d8d8d8;
+  --link: #66adff;
+  --badge-lead: #ff9101; /* 徽章·主笔（组长 / 主管） */
+  --badge-team: #ffdc76; /* 徽章·组员 */
+  --white: #fff;
 
-//  cards
-.intro-card-father {
-  flex-wrap: wrap;
-  margin: 10px 15px;
-  @media (min-width: 768px) {
-    margin: 15px 20px;
-  }
-  @media (min-width: 1024px) {
-    margin: 20px 30px;
-  }
-  min-width: calc(170 / 1280) * 100vw;
-}
-.intro-card-father:hover .intro-content {
-  @include transingle(rotateY(0deg));
-}
-.intro-card {
-  max-width: calc(170 / 1280) * 100vw;
-  min-width: 150px;
-  min-height: calc(190 / 700) * 100vh;
-  background-color: $introCard-grey;
-  border-radius: 35px;
-  font-weight: 550;
+  --font-cjk:
+    "Source Han Sans SC", "Source Han Sans CN", "思源黑体", "Noto Sans SC",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-latin:
+    "Microsoft YaHei", "Microsoft YaHei UI", "MSYH", Arial, sans-serif;
 
-  @include transingle(rotateY(0deg));
-  transition: all 0.5s ease-in-out 0s;
-  -moz-transition: all 0.5s ease-in-out 0s;
-  -webkit-transition: all 0.5s ease-in-out 0s;
-  -o-transition: all 0.5s ease-in-out 0s;
-}
-.intro-photo {
-  display: block;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
+  --ease: cubic-bezier(0.66, 0, 0.34, 1);
+  --dur: 0.78s;
+
+  /* 动效标尺：反馈 90 / 微 180 / 标准 340 / 主 780 */
+  --ease-out-q: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-q: cubic-bezier(0.4, 0, 0.7, 0.2);
+
+  /* 立绘切换：出场淡出 → 入场擦除（先让旧人离开，新人再进） */
+  --art-out: 0.16s;
+  --art-move: 0.3s;
+  --art-in: 0.26s;
+  --art-delay: 0.08s;
+  --art-lift: 8px; /* 悬浮抬升：纯位移，不缩放（缩放会重采样发虚） */
+  --art-up: 0.3s;
+  --art-down: 0.42s;
+
   position: relative;
+  width: 90rem; /* 1440 */
+  height: 56.25rem; /* 900 */
+  margin: 0 auto;
   overflow: hidden;
-  top: 25px;
-  left: 50%;
-  @include transingle(translateX(-50%));
-  background-size: contain;
-  background-color: #fff;
-  img {
-    width: auto;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font-cjk);
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* 画板整体不可选中：
+     否则连续点击（切组、翻页、开合面板）会触发双击选词 / 三击选段，
+     页面上会冒出选区高亮和一闪一闪的插入光标（I-beam），像多了个竖线。
+     这是操作面板，不是待复制的正文，所以整块关掉选区更干净。 */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* ======================================================================
+     左栏：组别信息（宽度会随交互收窄）
+     ====================================================================== */
+  .panel-info {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 59rem; /* 939 内容 + 5px 分隔线 */
     height: 100%;
+    padding: 3rem 0 0 2.25rem; /* 上 48 / 左 36 */
+    border-right: 0.3125rem solid var(--line);
+    transition: width var(--dur) var(--ease);
   }
-}
-.intro-position {
-  font-size: smaller;
-  display: inline-block;
-  position: relative;
-  top: 10px;
-  left: 20px;
-  min-width: 45px;
-  height: 20px;
-  background-color: rgb(253, 172, 31);
-  color: white;
-  border-radius: 135px;
-  text-align: center;
-}
-.intro-name {
-  margin-left: 20%;
-  margin-top: 25px;
-}
-.intro-tag {
-  margin-left: 20%;
-}
-.intro-content {
-  border-radius: 35px;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.7);
-  @include transingle(rotateY(90deg));
-  transition: all 0.5s ease-in-out 0s;
-  font-size: 13px;
-}
-.intro-words-container {
-  padding: 7% 5%;
-}
-.intro-words {
-  width: 41.7%;
-  height: 23.4%;
-  background-color: rgb(253, 172, 31);
-  color: $txt-white;
-  border-radius: 135px;
-  margin: 8% auto;
-  font-size: 16px;
+
+  /* 组名：点开成员后绕 D 顺时针旋转 90° 并缩到 0.75 */
+  .group-title {
+    height: 6rem; /* 行盒固定：旋转后字号变小，下方内容不上移 */
+    margin: 0 0 0 0.25rem;
+    font-family: var(--font-latin);
+    font-size: 6rem; /* 96 */
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--black);
+    transform-origin: 2.875rem 2.71875rem; /* D 字墨迹中心（96px 时） */
+    transition:
+      font-size var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  /* 正文 / 引言：宽度同设计稿，保证一致的断行 */
+  .group-desc,
+  .group-quote {
+    width: 35.9375rem; /* 575 */
+    margin: 4.25rem 0 0;
+    font-size: 1.25rem; /* 20 */
+    line-height: 1.8125rem; /* 29 */
+    color: var(--ink);
+  }
+
+  .group-quote {
+    margin-top: 1.8125rem; /* 29 */
+  }
+
+  /* 收尾的引号单独占一行（跟设计稿一致） */
+  .quote-end {
+    display: block;
+  }
+
+  .group-link {
+    display: block;
+    width: fit-content;
+    margin-top: 1.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1.8125rem;
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3125rem;
+    cursor: pointer;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease,
+      color 0.18s ease;
+  }
+
+  .group-link:hover,
+  .group-link:focus-visible {
+    color: var(--purple);
+  }
+
+  /* 组别导航 ------------------------------------------------------------ */
+  .group-nav {
+    margin: 1.25rem 0 0 -2.25rem; /* 左移 36，让 5px 横线上顶到画板左缘 */
+    padding: 2.0625rem 0 0 2.25rem;
+    border-top: 0.3125rem solid var(--line);
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      /* 本组有 5 个组别（安卓组已并入前端组），与设计稿同量级 */
+      margin-bottom: 1.25rem; /* 20 */
+
+      &.is-active a {
+        color: var(--purple);
+      }
+
+      /* 当前组：紫色三角 14 × 26 */
+      &.is-active a::before {
+        content: "";
+        margin: 0 0.625rem 0 0.375rem;
+        border-left: 0.875rem solid var(--purple);
+        border-top: 0.8125rem solid transparent;
+        border-bottom: 0.8125rem solid transparent;
+      }
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem; /* 24 */
+      line-height: 2.125rem; /* 34 */
+      color: var(--ink-50);
+      text-decoration: none;
+      transition: color 0.18s ease;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--purple);
+      }
+    }
+  }
+
+  /* ======================================================================
+     右栏：角色主视觉（位置会随交互左移）
+     ====================================================================== */
+  .panel-art {
+    position: absolute;
+    left: 59rem; /* 944 */
+    top: 0;
+    width: 31rem; /* 496 */
+    height: 100%;
+    overflow: hidden;
+    background: var(--white);
+    transition: left var(--dur) var(--ease);
+  }
+
+  /* 顶部装饰色条 151 × 9 */
+  .art-bar {
+    position: absolute;
+    left: 19.0625rem; /* 305 */
+    top: 5.5rem; /* 88 */
+    z-index: 4;
+    display: flex;
+    width: 9.4375rem; /* 151 */
+    height: 0.5625rem; /* 9 */
+    pointer-events: none; /* 纯装饰，别截走立绘的 hover */
+
+    i {
+      display: block;
+    }
+
+    .bar-yellow {
+      width: 3.25rem; /* 52 */
+      background: var(--yellow);
+    }
+
+    .bar-black {
+      flex: 1; /* 99 */
+      background: var(--black);
+    }
+  }
+
+  /* 竖排英文 --------------------------------------------------------------
+     每行字由「实心黑字」+「空心描边字」两层同心同位叠成：
+       · 实心层 z-index 1 —— 在人物之下，白底处为纯黑实心字；
+       · 描边层 z-index 3 —— 在人物之上，压在人身上时只剩 2px 空心描边。
+     .word 只作定位壳，不带 transform / z-index（否则会自成层叠上下文）。
+     本身 0×0 但子 span 有实体盒子，且描边层压在人物之上 —— 不关掉指针会截走
+     立绘的 :hover（鼠标划过竖排字时人物会抖一下）。pointer-events 可继承，写壳上即可。 */
+  .word {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+
+    &__fill,
+    &__stroke {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+      transform: rotate(90deg);
+      font-family: var(--font-latin);
+      font-weight: 700;
+      font-size: 5.875rem; /* 94 */
+      line-height: 1;
+      letter-spacing: 0.075rem; /* 1.2 */
+      white-space: nowrap;
+    }
+
+    &__fill {
+      color: var(--black);
+      z-index: 1;
+    }
+
+    &__stroke {
+      color: transparent;
+      -webkit-text-stroke: 0.125rem var(--black); /* 2px */
+      z-index: 3;
+    }
+
+    /* 两行字固定为 CREATIVE / POWER，位置照设计稿 —— 各组共用同一套 */
+    &--creative {
+      left: 8.11375rem; /* 129.82 */
+      top: 5.53125rem; /* 88.5 */
+    }
+
+    &--power {
+      left: 27.73875rem; /* 443.82 */
+      top: 29.7475rem; /* 475.96 */
+    }
+  }
+
+  /* 品牌色块 61 / 30 / 20，间距 7 */
+  .art-swatches {
+    position: absolute;
+    left: 2.875rem; /* 46 */
+    top: 52.8125rem; /* 845 */
+    z-index: 4;
+    display: flex;
+    gap: 0.4375rem;
+    height: 1.25rem;
+    pointer-events: none; /* 纯装饰，别截走立绘的 hover */
+
+    i {
+      display: block;
+    }
+
+    .sw-purple {
+      width: 3.8125rem; /* 61 */
+      background: var(--purple);
+    }
+
+    .sw-black {
+      width: 1.875rem; /* 30 */
+      background: var(--black);
+    }
+
+    .sw-yellow {
+      width: 1.25rem; /* 20 */
+      background: var(--yellow);
+    }
+  }
+
+  /* 横竖分隔线交点圆点（跟随左栏一起左移）
+     悬浮放大 + 外阴影；点击在「组别介绍 ⇄ 成员介绍」之间切换 */
+  .divider-dot {
+    position: absolute;
+    left: 57.71875rem; /* 923.5 */
+    top: 26.96875rem; /* 431.5 */
+    z-index: 5;
+    width: 1.875rem; /* 30 */
+    height: 1.875rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--purple);
+    cursor: pointer;
+    transition:
+      left var(--dur) var(--ease),
+      transform 0.26s var(--ease),
+      box-shadow 0.26s var(--ease);
+  }
+
+  .divider-dot:hover,
+  .divider-dot:focus-visible {
+    transform: scale(1.34);
+    box-shadow:
+      0 0 0 0.375rem rgba(115, 34, 255, 0.16),
+      0 0.25rem 0.75rem rgba(0, 0, 0, 0.28);
+    outline: none;
+  }
+
+  .divider-dot:active {
+    transform: scale(1.18);
+  }
+
+  /* ======================================================================
+     成员介绍面板：默认在画板右侧之外，点开后滑入
+     面板 744 × 772，左上角落在画板 (644, 62)
+     ====================================================================== */
+  .panel-members {
+    position: absolute;
+    left: 40.25rem; /* 644 */
+    top: 3.875rem; /* 62 */
+    z-index: 6;
+    width: 46.5rem; /* 744 */
+    height: 48.25rem; /* 772 */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(7.5rem);
+    pointer-events: none;
+    transition:
+      opacity 0.5s ease 0.06s,
+      transform var(--dur) var(--ease) 0.06s,
+      visibility 0s linear var(--dur);
+  }
+
+  .members-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0.4375rem; /* 7 —— 与设计稿墨迹顶对齐 */
+    margin: 0;
+    font-family: var(--font-latin);
+    font-size: 3rem; /* 48 */
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  /* 卡片视窗：4 列 × 3 行。上边留 12px 出血，否则卡片投影的上半部分会被裁掉 */
+  .members-viewport {
+    position: absolute;
+    left: 0;
+    top: 6.5rem; /* 104 —— 比首行卡片顶高 12 */
+    width: 46.5rem; /* 744 */
+    height: 39.25rem; /* 628 */
+    overflow: hidden;
+    transition: opacity 0.18s ease;
+  }
+
+  /* 成员页内换组的瞬间：卡片区淡出，避免 12 张卡生硬跳变 */
+  .members-viewport.is-swapping {
+    opacity: 0;
+  }
+
+  .members-track {
+    display: flex;
+    width: calc(var(--pages, 4) * 100%);
+    height: 100%;
+    transition: transform 0.55s var(--ease);
+  }
+
+  .members-page {
+    flex: 0 0 46.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 7.5rem); /* 4 × 120 */
+    grid-auto-rows: 10rem; /* 行高 160 */
+    column-gap: 3.5833rem;
+    row-gap: 3.8125rem; /* 61 */
+    align-content: start;
+    padding: 0.75rem 0 0 2.5rem; /* 上 12（视窗出血）/ 左 40 */
+
+    /* 设计稿第三行比等距网格高 11px（行距 61 / 50 不等），如实还原。
+       空位 .member-slot 也要跟着上移，否则第三行会跟前面错开。
+       若要改成等距网格，删掉下面这条规则即可。 */
+    > .member-card:nth-child(n + 9),
+    > .member-slot:nth-child(n + 9) {
+      transform: translateY(-0.6875rem);
+    }
+  }
+
+  /* 空位：人数不足一页时占住格子，不画任何东西（不循环补人） */
+  .member-slot {
+    display: block;
+    width: 7.5rem;
+    height: 10rem;
+  }
+
+  /* 成员卡 -------------------------------------------------------------- */
+  .member-card {
+    position: relative;
+    width: 7.5rem; /* 120 */
+    height: 10rem; /* 160 */
+    border-radius: 0.625rem; /* 10 */
+    background: var(--white);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.22);
+  }
+
+  /* 徽章胶囊：宽度固定，保证 12 张卡徽章左缘对齐；
+     实际职务名最长到「八代目 组长 主管」8 个字，按 85px × 10px 放得下 */
+  .member-badge {
+    position: absolute;
+    left: 50%;
+    top: 0.375rem; /* 6 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5.3125rem; /* 85 */
+    height: 0.625rem; /* 10 */
+    padding: 0;
+    border-radius: 0.3125rem;
+    background: var(--badge-team);
+    color: var(--white);
+    font-size: 0.5rem; /* 8 */
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    transform: translateX(-50%);
+  }
+
+  /* 组长 / 主管：主笔色 */
+  .member-badge.is-lead {
+    background: var(--badge-lead);
+  }
+
+  /* 头像框 86 × 53 */
+  .member-avatar {
+    position: absolute;
+    left: 0.9375rem; /* 15 */
+    top: 1.25rem; /* 20 */
+    width: 5.375rem; /* 86 */
+    height: 3.3125rem; /* 53 */
+    border: 1px solid #ececec;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    background: #f6f6f6;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 头像比例各异，裁切填满框 */
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  /* 姓名：安卓组并入前端后，最长会出现「Andrew-pqc（安卓）」这种 15 字符的名字。
+     卡片内宽只有 104，按 15px 放不下，会被省略号吃掉「（安卓）」后缀 —— 那正是
+     要让人看见的信息。所以字号收到 0.625rem 并允许折两行，保证后缀不被裁掉。 */
+  .member-name {
+    position: absolute;
+    left: 0.4375rem;
+    right: 0.4375rem;
+    top: 4.6875rem; /* 75 */
+    margin: 0;
+    font-size: 0.625rem; /* 10 */
+    font-weight: 700;
+    line-height: 0.9375rem; /* 15 —— 最多两行 */
+    text-align: center;
+    color: var(--ink);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .member-desc {
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 7.1875rem; /* 115 */
+    margin: 0;
+    font-size: 0.6875rem; /* 11 */
+    line-height: 0.9375rem; /* 15 */
+    text-align: center;
+    color: var(--ink);
+    /* 简介长短不一，统一压到两行，卡片高度才齐 */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  /* 左右箭头 8 × 17 */
+  .members-arrow {
+    position: absolute;
+    top: 25.375rem; /* 406 */
+    width: 0.5rem;
+    height: 1.0625rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-50);
+    cursor: pointer;
+    transition: color 0.18s ease;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--purple);
+    }
+
+    &--prev {
+      left: 0;
+    }
+
+    &--next {
+      right: 0.125rem;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* 分页圆点 */
+  .members-dots {
+    position: absolute;
+    left: 21.09375rem; /* 337.5 */
+    top: 47.3125rem; /* 757 */
+    display: flex;
+    gap: 0.75rem; /* 12 */
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 0.84375rem; /* 13.5 槽位，切换时不错位 */
+      height: 0.9375rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      cursor: pointer;
+
+      /* 内容不够 MIN_PAGES 页时，多出来的点没有对应页面：置灰且不可点 */
+      &:disabled {
+        cursor: default;
+        opacity: 0.42;
+      }
+    }
+
+    i {
+      display: block;
+      flex: 0 0 auto; /* 槽位 13.5 < 选中点 15，禁止收缩，否则会被压成椭圆 */
+      width: 0.75rem; /* 12 */
+      height: 0.75rem;
+      border-radius: 50%;
+      background: var(--line);
+      transition: all 0.3s ease;
+    }
+
+    .is-active i {
+      width: 0.9375rem; /* 15 */
+      height: 0.9375rem;
+      background: rgba(61, 61, 61, 0.59);
+    }
+  }
+
+  /* ======================================================================
+     交互后（.stage.is-members）
+     ====================================================================== */
+  &.is-members {
+    .panel-info {
+      width: 10rem; /* 944 → 160 */
+    }
+
+    .panel-art {
+      left: 10.875rem; /* 944 → 174 */
+    }
+
+    .divider-dot {
+      left: 8.71875rem; /* 923.5 → 139.5 */
+    }
+
+    /* 组名：绕 D 顺时针 90°，字号放大 90%（1.9rem → 3.61rem）
+       ⚠️ 不能照抄设计稿的 4.5rem：设计稿的组名是 Design（6 字母），站内有
+       Operations（10 字母）。旋转 90° 后字是顺着竖直方向往下走的，字号越大越容易
+       压到左下角导航的文字上 —— 3.61rem 是「最长组名仍不与导航重叠」的实测上限。 */
+    .group-title {
+      font-size: 3.61rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      transform: translateX(-0.875rem) translateY(-1.734375rem) rotate(90deg);
+    }
+
+    /* 简介 / 引言 / 查看成员淡出（保留占位，导航不会上跑） */
+    .group-desc,
+    .group-quote,
+    .group-link {
+      opacity: 0;
+      transform: translateY(-0.75rem);
+      pointer-events: none;
+    }
+
+    /* 成员面板滑入 */
+    .panel-members {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      pointer-events: auto;
+      transition:
+        opacity 0.5s ease 0.12s,
+        transform var(--dur) var(--ease) 0.12s,
+        visibility 0s;
+    }
+  }
 }
 
-//  controller
-.intro-controller {
-  position: absolute;
-  bottom: calc(10 / 700) * 100vh;
-  right: 0;
-  margin-top: calc(66 / 700) * 100vh;
-  background-image: url("http://static.muxixyz.com/index_site/member-tab-background-pic.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: calc(89 / 700) * 100vh;
-  width: 100%;
-}
-.intro-tags {
-  display: flex;
-  width: 100%;
-}
-ul {
-  height: calc(89 / 700) * 100vh;
-  padding-top: 2vh;
-}
-li {
-  list-style: none;
-  text-align: center;
-  width: 20%;
-  line-height: calc(70 / 700) * 100vh;
-}
-li > a {
-  font-size: 15px;
-  @media (min-width: 768px) {
-    font-size: 20px;
-  }
-  @media (min-width: 1024px) {
-    font-size: 20px;
-  }
-  cursor: pointer;
-}
-li > .onTag {
-  font-weight: 600;
-  font-size: 20px;
-  @media (min-width: 768px) {
-    font-size: 25px;
-  }
-  @media (min-width: 1024px) {
-    font-size: 25px;
-  }
-  color: rgb(250, 174, 28);
-  text-shadow: 2px 2px 6px rgb(250, 174, 28), -1px -1px #fff, 1px -1px #444;
-}
+/* ==========================================================================
+   画板尺度：1440×900 画板由 JS 按第三 section 尺寸等比缩放（transform: scale），
+   section 用 flex 居中兜住余白。这里不再改 html/body 的根字号或布局，
+   以免影响首页其他 section 的滚动与排版。
+   ========================================================================== */
 
-//intro.tsx
-.intro-card-containner {
-  overflow-y: scroll;
-  overflow-x: clip;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  flex-wrap: wrap;
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    .panel-info,
+    .panel-art,
+    .divider-dot,
+    .group-title,
+    .group-desc,
+    .group-quote,
+    .group-link,
+    .panel-members,
+    .members-track {
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
