@@ -427,6 +427,77 @@ $home-ink: #3d3d3d;
 .home-blog-study-circle6 {
   top: 431.64px;
   left: 816.67px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 0.26s ease;
+}
+
+.home-blog-page.is-study-materials-open .home-blog-study-circle6 {
+  pointer-events: auto;
+}
+
+.home-blog-study-circle6:disabled {
+  cursor: default;
+}
+
+.home-blog-study-circle6::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, #0066ffa3 0%, #0066ff00 100%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.26s ease;
+}
+
+.home-blog-study-circle6:is(:hover, :focus-visible) {
+  background: #0066ff;
+}
+
+.home-blog-study-circle6:is(:hover, :focus-visible)::after {
+  opacity: 1;
+}
+
+.home-blog-study-circle6:focus-visible {
+  outline: 2px solid #0066ff;
+  outline-offset: 5px;
+}
+
+.home-blog-study-return-label,
+.home-blog-study-return-en {
+  position: absolute;
+  top: -2px;
+  height: 20px;
+  color: #000000;
+  font-size: 22px;
+  line-height: 89.75%;
+  letter-spacing: 0;
+  white-space: nowrap;
+  transition: color 0.22s ease;
+}
+
+.home-blog-study-return-label {
+  left: 30.84px;
+  font-family: 'Source Han Sans', 'Microsoft YaHei', sans-serif;
+  font-weight: 700;
+}
+
+.home-blog-study-return-en {
+  left: 82.84px;
+  color: #999999;
+  font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  font-weight: 400;
+}
+
+.home-blog-study-circle6:is(:hover, :focus-visible) .home-blog-study-return-label,
+.home-blog-study-circle6:is(:hover, :focus-visible) .home-blog-study-return-en {
+  color: #0066ff;
 }
 
 .home-blog-study-card {
@@ -1265,6 +1336,9 @@ $home-ink: #3d3d3d;
   .home-blog-study-circle4,
   .home-blog-study-circle5,
   .home-blog-study-circle6,
+  .home-blog-study-circle6::after,
+  .home-blog-study-return-label,
+  .home-blog-study-return-en,
   .home-blog-study-design-label,
   .home-blog-study-design-en,
   .home-blog-study-frontend-label,

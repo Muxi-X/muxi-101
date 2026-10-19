@@ -27,6 +27,7 @@ export default function BlogSection({
   groupPosts: GroupBlogPost[]
 }) {
   const sectionRef = useRef<HTMLElement>(null)
+  const materialsButtonRef = useRef<HTMLButtonElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isStudyMaterialsOpen, setIsStudyMaterialsOpen] = useState(false)
   const [activeGroup, setActiveGroup] = useState<string | null>(null)
@@ -54,6 +55,13 @@ export default function BlogSection({
 
   const handleGroupMouseLeave = () => {
     groupHoverTimeout.current = setTimeout(() => setActiveGroup(null), 180)
+  }
+
+  const handleBackToBlogs = () => {
+    if (groupHoverTimeout.current) clearTimeout(groupHoverTimeout.current)
+    setActiveGroup(null)
+    setIsStudyMaterialsOpen(false)
+    materialsButtonRef.current?.focus()
   }
 
   return (
@@ -141,7 +149,16 @@ export default function BlogSection({
             </article>
           </div>
         ))}
-        <div className="home-blog-study-circle6" />
+        <button
+          aria-label="返回热门博客"
+          className="home-blog-study-circle6"
+          disabled={!isStudyMaterialsOpen}
+          onClick={handleBackToBlogs}
+          type="button"
+        >
+          <span className="home-blog-study-return-label">返回</span>
+          <span className="home-blog-study-return-en">Return</span>
+        </button>
         <div className="home-blog-study-design-label">设计组</div>
         <div className="home-blog-study-design-en">Design</div>
         <div className="home-blog-study-frontend-label">前端组</div>
@@ -156,7 +173,8 @@ export default function BlogSection({
       <button
         aria-expanded={isStudyMaterialsOpen}
         className="home-blog-materials"
-        onClick={() => setIsStudyMaterialsOpen((isOpen) => !isOpen)}
+        onClick={() => setIsStudyMaterialsOpen(true)}
+        ref={materialsButtonRef}
         type="button"
       >
         <span className="home-blog-materials-study">Study</span>{' '}

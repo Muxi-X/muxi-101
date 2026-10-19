@@ -192,6 +192,7 @@ function Intro() {
 	const titleBoxRef = useRef<HTMLHeadingElement>(null);
 	const descRef = useRef<HTMLParagraphElement>(null);
 	const quoteRef = useRef<HTMLParagraphElement>(null);
+	const artRef = useRef<HTMLImageElement>(null);
 	/* 已经播报过的那一组（用于跳过重复触发、以及取「出场要送走的旧词」）。
 	   null = 还没播过任何一次（首帧只登记，不播）。 */
 	const shownGroupRef = useRef<number | null>(null);
@@ -209,7 +210,8 @@ function Intro() {
 		const titleBox = titleBoxRef.current;
 		const desc = descRef.current;
 		const quote = quoteRef.current;
-		if (!stage || !title || !titleBox || !desc || !quote) return;
+		const art = artRef.current;
+		if (!stage || !title || !titleBox || !desc || !quote || !art) return;
 
 		// 首帧只登记，不播
 		if (shownGroupRef.current === null) {
@@ -241,6 +243,7 @@ function Intro() {
 		/* 让「基础态」先落定一帧，再挂 .is-out。
 		   本函数在 commit 之后、绘制之前同步跑；如果在这里立刻加类，
 		   transition 的起始值就是新算出来的目标值，过渡会被跳过。 */
+		art.classList.add("is-out");
 		void title.offsetWidth;
 		outFrameRef.current = window.requestAnimationFrame(() => {
 			if (token !== textTokenRef.current) return;
@@ -283,6 +286,8 @@ function Intro() {
 				block.classList.remove("is-out");
 				block.classList.add("is-in");
 			}
+			art.classList.remove("is-out");
+			art.classList.add("is-in");
 
 			/* 入场结束后摘掉 is-in，标题留在基础态。
 			   ⚠️ 字母是常驻结构，这里**不要**再把标题换成纯文本 ——
@@ -293,6 +298,7 @@ function Intro() {
 					if (token !== textTokenRef.current) return;
 					titleBox.classList.remove("is-in");
 					for (const block of blocks) block.classList.remove("is-in");
+					art.classList.remove("is-in");
 				},
 				inMs + 40,
 			);
@@ -310,6 +316,7 @@ function Intro() {
 			cancelAnimationFrame(outFrameRef.current);
 			titleBox.classList.remove("is-in");
 			for (const block of blocks) block.classList.remove("is-in");
+			art.classList.remove("is-out", "is-in");
 		};
 	}, [groupIndex]);
 
@@ -647,6 +654,7 @@ function Intro() {
 				{group.art ? (
 					<img
 						className="panel-char"
+						ref={artRef}
 						key={group.tag}
 						src={group.art}
 						alt={`${group.tag}组角色形象`}

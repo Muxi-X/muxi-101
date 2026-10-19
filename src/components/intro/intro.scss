@@ -465,6 +465,19 @@
     -webkit-user-drag: none;
   }
 
+  .panel-char.is-out {
+    opacity: 0;
+  }
+
+  .panel-char.is-in {
+    transition: none;
+    animation-name: txtBlkIn;
+    animation-duration: var(--txt-in);
+    animation-timing-function: var(--ease-out-q);
+    animation-fill-mode: backwards;
+    animation-delay: var(--txt-lead);
+  }
+
   /* 品牌色块 61 / 30 / 20，间距 7 */
   .art-swatches {
     position: absolute;
@@ -918,7 +931,8 @@
        位移本身保留 —— 它是「内容换了一组」的状态提示，不是装饰动效。 */
     .group-title .lt,
     .group-desc,
-    .group-quote {
+    .group-quote,
+    .panel-char {
       transition-duration: 0.01ms !important;
       transition-delay: 0s !important;
       animation-duration: 0.01ms !important;
