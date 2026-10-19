@@ -1,4 +1,4 @@
-﻿// 成员介绍页的数据整理层
+// 成员介绍页的数据整理层
 //
 // 数据来源：./info —— 历届成员（照片 / 姓名 / 职务 / 简介），不改动任何原始内容。
 //
@@ -34,6 +34,10 @@ export interface MemberGroup {
 	intro: string;
 	/** 组别引言（收尾引号单独一行，见 .quote-end） */
 	quote: string;
+	/** 右栏角色立绘（竖排字中间那一个） */
+	art: string;
+	/** 右栏两行竖排英文：[左上那行, 右下那行] */
+	words: [string, string];
 	/** 成员列表 */
 	members: MemberCard[];
 }
@@ -42,6 +46,37 @@ export interface MemberGroup {
 const MERGE_INTO = "前端";
 const MERGE_TAG = "安卓";
 const MERGE_SUFFIX = "（安卓）";
+
+/**
+ * 组名 → 右栏角色立绘（两组竖排英文中间的那一个）。
+ * ⚠️ 一组一个角色，五组一一对应，图在 public/characters/ 下，走站内路径引用
+ *    （不是 base64 内嵌）；以后传到 static.muxixyz.com，只把这里换成完整 URL 即可。
+ */
+const ART: Record<string, string> = {
+	产品: "/characters/product.png",
+	运营: "/characters/operations.png",
+	设计: "/characters/design.png",
+	前端: "/characters/frontend.png",
+	后端: "/characters/backend.png",
+};
+
+/**
+ * 组名 → 右栏两行竖排英文：[左上那行, 右下那行]。
+ * 位置由 .word--creative / .word--power 两条规则决定（照设计稿量取）：
+ *   · [0] 落在左上（与 CREATIVE 同位）
+ *   · [1] 落在右下（与 POWER 同位）
+ * 换组时只换文字，位置不动。
+ * ⚠️ 设计组暂未给词，沿用设计稿原有的 CREATIVE / POWER；给了直接替换这两项即可。
+ */
+const WORDS: Record<string, [string, string]> = {
+	后端: ["ROBUST", "LOGICAL"],
+	前端: ["PRECISE", "SWIFT"],
+	产品: ["CLEAR", "INTUITIVE"],
+	运营: ["AGILE", "RELIABLE"],
+};
+
+/** 没配词的组（目前只有设计组）用设计稿原词兜底 */
+const WORDS_FALLBACK: [string, string] = ["CREATIVE", "POWER"];
 
 /** 组名 → 英文名 + 组别简介 / 引言 */
 const COPY: Record<string, { en: string; intro: string; quote: string }> = {
@@ -73,9 +108,9 @@ const COPY: Record<string, { en: string; intro: string; quote: string }> = {
 	},
 	运营: {
 		en: "Operations",
-		intro: "负责团队内部的内容运营与品牌传播，追求有温度、可持续的社区氛围与影响力。",
+		intro: "负责团队内部的内容运营与活动策划，追求有温度的表达与可持续的增长。",
 		quote:
-			"“让好产品被更多人看见，让每一次发声都值得被记住。在这里，运营不是吆喝，而是把对的事讲给对的人听。\n”",
+			"“让好内容被更多人看见，让每次活动都留下痕迹。在这里，数据和创意从来不是对立的两面。\n”",
 	},
 };
 
@@ -117,6 +152,8 @@ export function buildGroups(): MemberGroup[] {
 				en: copy?.en ?? group.tag,
 				intro: copy?.intro ?? "",
 				quote: copy?.quote ?? "",
+				art: ART[group.tag] ?? "",
+				words: WORDS[group.tag] ?? WORDS_FALLBACK,
 				members:
 					group.tag === MERGE_INTO ? [...group.people, ...androidCards] : group.people,
 			};
