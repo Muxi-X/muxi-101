@@ -3,6 +3,11 @@ import nextra from 'nextra'
 
 const withNextra = nextra({})
 
-const nextConfig: NextConfig = withNextra({})
+const nextConfig: NextConfig = withNextra({
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
+})
 
 export default nextConfig
