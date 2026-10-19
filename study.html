@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木犀官网 · 学习资料</title>
+<style>
+/* ============================================================
+   Design tokens —— 与首页同源
+   #FFFFFF 底 / #D6E6FF 浅蓝面 / #0066FF 品牌蓝 / #001029 深字 / #000000 墨线
+   ============================================================ */
+:root{
+  --c-white: #FFFFFF;
+  --c-sky:   #D6E6FF;
+  --c-blue:  #0066FF;
+  --c-navy:  #001029;
+  --c-black: #000000;
+  --c-gray:  #999999;
+
+  --font-latin: "Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+  --font-cjk:   "Source Han Sans SC","Noto Sans SC","思源黑体","Microsoft YaHei",sans-serif;
+
+  /* 折线画完所需时间。用户要求"前面折线浮现速度加快"：2.4s → 1.6s。
+     只改总时长、不换缓动 —— 各段相对速度不变（仍近匀速），
+     所以下面 .nN 的延迟表按 2.4→1.6 等比缩放（×2/3）就行，
+     不会出现"某一段忽快忽慢"的老问题。 */
+  --t-draw: 1.6s;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  /* 1rem = 16 设计像素；1440x900 画板在任意视口等比完整显示 */
+  font-size: calc(min(100vw / 1440, 100vh / 900) * 16);
+}
+
+body{
+  margin:0;
+  background:var(--c-white);
+  display:grid;
+  place-items:center;
+  min-height:100vh;
+  overflow:hidden;
+}
+
+.stage{
+  position:relative;
+  width:90rem;      /* 1440 */
+  height:56.25rem;  /* 900  */
+  overflow:hidden;
+  background:var(--c-white);
+}
+
+/* SVG 的 viewBox 就是设计稿坐标 0 0 1440 900，
+   所以下面所有数值直接写设计稿量到的 px，不需要换算 */
+.scene{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* ---------------- 装饰：浅蓝圆 + 蓝环 ---------------- */
+.disc{ fill:var(--c-sky); }
+
+.ring{
+  fill:none;
+  stroke:var(--c-blue);
+  stroke-width:2.1;
+}
+
+/* ---------------- 标题 ---------------- */
+.title{
+  font-family:var(--font-latin);
+  font-weight:700;
+  font-size:72px;
+  text-anchor:start;
+}
+.title--study{ fill:var(--c-blue); }
+.title--material{ fill:var(--c-navy); }
+
+/* ============================================================
+   折线
+   pathLength="1" 把路径长度归一化：dasharray/dashoffset 直接用 0~1，
+   换坐标不必改动画，也不必写死 1122.71 这种实测长度
+   ============================================================ */
+.trace{
+  fill:none;
+  stroke:var(--c-black);
+  stroke-width:1;
+  stroke-linecap:butt;
+  stroke-linejoin:round;
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  /* 近匀速：各段绘制速度 .38/.43/.44/.44/.43/.38（极差 1.16 倍），
+     起步与收尾各留 82% 的速度做软起软停。详见下面 .nN 的注释。 */
+  animation:trace-draw var(--t-draw) cubic-bezier(.2,.15,.8,.85) forwards;
+}
+@keyframes trace-draw{ to{ stroke-dashoffset:0; } }
+
+/* ============================================================
+   节点
+   ⚠️ 定位用的 transform 写在 .pos（SVG 属性）上，动画用的 transform
+      只作用在 .pos 里面的 .node —— CSS transform 会整体覆盖 transform
+      属性，两者写在同一个元素上会互相打架（降级时 `transform:none`
+      会把 translate 一起抹掉，所有点塌到原点）。
+   ============================================================ */
+.node{
+  opacity:0;
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:node-pop .22s cubic-bezier(.34,1.4,.64,1) forwards;
+}
+@keyframes node-pop{
+  from{ opacity:0; transform:scale(.35); }
+  to  { opacity:1; transform:scale(1); }
+}
+
+/* 各节点出现时刻 = 笔尖走完对应弧长比例所需的时间。
+   缓动不是线性的，所以不是「路径比例 × 总时长」，而是对
+   cubic-bezier(.2,.15,.8,.85) 求了时间反函数，再按 1.6/2.4 缩放：
+   弧长比例 0/.1709/.3069/.4420/.5433/.8371/1 -> 0/.29/.51/.71/.87/1.31/1.6 s
+
+   ⚠️ 缓动一换、或总时长一改，这张表就必须整体重算，
+   否则点会在笔尖还没到的时候就先冒出来。 */
+.n1 .node{ animation-delay:0s;    }
+.n2 .node{ animation-delay:.29s;  }
+.n3 .node{ animation-delay:.51s;  }
+.n4 .node{ animation-delay:.71s;  }
+.n5 .node{ animation-delay:.87s;  }
+.n6 .node{ animation-delay:1.31s; }
+.n7 .node{ animation-delay:1.6s;  }
+
+/* ============================================================
+   点的状态
+   默认   ：黑色实心点（r=8）
+   hover / 点击：黑点上方淡入一枚品牌蓝实心核（r=9）+ 常驻蓝光晕，
+            组名标签同时转蓝
+   涟漪已按用户要求整段移除（保留 .node 里的定位结构，只是不再画环）
+   ============================================================ */
+.core{
+  fill:var(--c-black);
+}
+
+.core-blue{
+  fill:var(--c-blue);
+  opacity:0;
+  transition:opacity .26s ease;
+}
+
+/* 常驻光晕：径向渐变，alpha 从核心边缘线性衰减到 r=25.5 处的 0。
+   实测设计稿剖面 r=11:.373 r=15:.267 r=20:.141 r=24:.039 —— 完全线性；
+   端点 alpha 由「整块圆域像素差」扫描定为 .39（比直接读剖面值的 .42 略低，
+   因为渐变中段实际比线性模型淡一点） */
+.halo{
+  fill:url(#glow);
+  opacity:0;
+  transform-box:fill-box;
+  transform-origin:center;
+  transform:scale(.72);
+  transition:opacity .24s ease, transform .34s cubic-bezier(.22,1.2,.36,1);
+  pointer-events:none;
+}
+
+/* 涟漪已整段移除（用户：去掉涟漪）。
+   原本这里是 .ripple / .ripple-glow 两个描边环 + 两条动画，
+   HTML 里对应的 <circle> 也一并删了，避免留一堆 opacity:0 的死节点。 */
+
+/* ---------------- 标签：跟着各自的黑点出现 ---------------- */
+/* 用户要求"每个点出现后该点的组别字体也出现"，所以标签不再等 hover：
+   基础态 opacity:0，靠一条带独立延迟的入场动画淡入（延迟 = 该点延迟 + 0.16s，
+   正好落在 .node 那 0.22s 的弹跳基本落定之后）。
+   `forwards` 把终态锁在 opacity:1，hover 时只改 fill，不再动透明度。 */
+.lbl{
+  text-anchor:start;
+  user-select:none;
+  opacity:0;
+  transition:fill .22s ease;
+  pointer-events:none;
+  animation:lbl-in .42s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes lbl-in{
+  from{ opacity:0; transform:translateY(3px); }
+  to  { opacity:1; transform:translateY(0);   }
+}
+.n2 .lbl{ animation-delay:.45s; }
+.n3 .lbl{ animation-delay:.67s; }
+.n4 .lbl{ animation-delay:.87s; }
+.n5 .lbl{ animation-delay:1.03s; }
+.n6 .lbl{ animation-delay:1.47s; }
+.n7 .lbl{ animation-delay:1.76s; }
+.lbl--cjk{
+  font-family:var(--font-cjk);
+  font-weight:700;
+  font-size:22px;
+  fill:var(--c-black);
+}
+.lbl--en{
+  font-family:var(--font-latin);
+  font-weight:400;
+  font-size:22.2px;
+  fill:var(--c-gray);
+}
+
+/* ---------------- 命中区 ---------------- */
+.hit{
+  fill:none;
+  pointer-events:all;
+}
+
+/* n1 是折线的起点，既没标签也不是链接 —— 它不该有 hover 反馈。
+   ① 不接指针：`.node` 整组关掉（`core`/`halo` 这些描边本身也是 paintable，
+   鼠标压上去照样算命中）。⚠️ `pointer-events` 虽然可继承，但 `.hit` 自己写了
+   `pointer-events:all`，**子元素的自有声明会盖掉继承值** —— 所以必须单独再关一次，
+   否则 n1 依然会接住指针（视觉上没变化，但 `.pos.n1:hover` 会亮，是条死掉的交互暗示）。
+   ② hover 规则用 :not(.n1) 兜底排除。
+   涟漪不在此列：涟漪提示的是"这一串点可以点"，n1 跟着一起跳才整齐。 */
+.n1 .node,
+.n1 .hit{ pointer-events:none; }
+
+/* ---------------- 交互（仅 n2–n7） ----------------
+   hover 与 focus 同款：用户要求"鼠标在点上 hover 或点击时蓝光动效不变"。
+   n2–n6 带 tabindex="0"（见 HTML），点一下就拿到焦点，Glow 留住；
+   n7 是 <a>，点击直接回首页。 */
+.pos:focus{ outline:none; }        /* SVG 的焦点框会画成怪异的方块，用发光代替 */
+
+@media (hover:hover){
+  .pos:not(.n1):is(:hover,:focus) .hit{ cursor:pointer; }
+}
+.pos:not(.n1):is(:hover,:focus) .core-blue{ opacity:1; }
+.pos:not(.n1):is(:hover,:focus) .halo{ opacity:1; transform:scale(1); }
+.pos:not(.n1):is(:hover,:focus) .lbl--cjk,
+.pos:not(.n1):is(:hover,:focus) .lbl--en{ fill:var(--c-blue); }
+
+/* ============================================================
+   故事卡
+   位置：贴着各自的点右侧浮起（n6 右下角没地方，改放左侧）。
+   ⚠️ 卡片层是铺满画板的绝对定位层 —— 必须 pointer-events:none，
+      否则它会把下层所有黑点的 hover 全吃掉（首页 .posts 踩过这个坑）；
+      卡片本身再单独 pointer-events:auto。
+   ============================================================ */
+.cards{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+/* ============================================================
+   微卡（hover 才有）
+   ============================================================
+   只放两行：一句定位 + 「查看资料」。200×62，紧贴自己的点。
+   关联性靠三件事建立：
+     ① 气泡离圆心只有 32px（原来大卡是 208px）；
+     ② 带一条指向点的尾巴，尾巴尖到圆心 26px —— 落在 .hit(r=30) 里，
+        所以「从黑点到气泡」的指针路径是连通的，不会闪过空隙；
+     ③ 位置按「标签在左就往右放、标签在右就往左放」定，不压自己的组名。
+   尾巴是 ::before 的边框三角，属于气泡自身 → 悬停尾巴算悬停气泡。
+   ============================================================ */
+.bubbles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.bubble{
+  position:absolute;
+  width:12.5rem;               /* 200 */
+  height:3.875rem;             /* 62  */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:0 .875rem;
+  border-radius:.75rem;
+  background:var(--c-white);
+  box-shadow:
+    0 .75rem 1.5rem -.5rem rgba(0,16,41,.16),
+    0 .125rem .5rem         rgba(0,16,41,.06);
+  opacity:0;
+  visibility:hidden;
+  translate:0 .25rem;          /* 起手 4px，跟着淡入浮一点 */
+  pointer-events:auto;
+  transition:opacity .15s ease, translate .15s ease, visibility 0s .15s;
+}
+.bubble__line{
+  font-family:var(--font-cjk);
+  font-size:.8125rem;          /* 13 */
+  line-height:1.2;
+  color:var(--c-navy);
+  white-space:nowrap;
+}
+.bubble__cta{
+  margin-top:.3125rem;
+  font-family:var(--font-cjk);
+  font-size:.71875rem;         /* 11.5 */
+  font-weight:700;
+  color:var(--c-blue);
+}
+.bubble::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  margin-top:-6px;
+  border:6px solid transparent;
+}
+.bubble--r::before{ left:-6px;  border-left-width:0;  border-right-color:var(--c-white); }
+.bubble--l::before{ right:-6px; border-right-width:0; border-left-color:var(--c-white); }
+
+/* 落点：left / top 都是设计 px ÷ 16；top = 圆心 y − 31（气泡高 62 的一半） */
+.bubble--n2{ left:1.625rem;  top:14.5rem;    }   /* 26,232   点 258,263，标签在右 → 放左 */
+.bubble--n3{ left:23.125rem; top:22.625rem;  }   /* 370,362  点 338,393，标签在左 → 放右 */
+.bubble--n4{ left:15.25rem;  top:26.5625rem; }   /* 244,425  点 476,456，标签在右 → 放左 */
+.bubble--n5{ left:29.9375rem;top:33.4375rem; }   /* 479,535  点 447,566，标签在左 → 放右 */
+.bubble--n6{ left:48.6875rem;top:41rem;      }   /* 779,656  点 747,703；标签在下方，气泡上移 16px 让开 */
+
+@media (hover:hover){
+  .stage:has(.pos.n2:hover) .bubble--n2,
+  .stage:has(.pos.n3:hover) .bubble--n3,
+  .stage:has(.pos.n4:hover) .bubble--n4,
+  .stage:has(.pos.n5:hover) .bubble--n5,
+  .stage:has(.pos.n6:hover) .bubble--n6,
+  .bubble:hover{
+    opacity:1;
+    visibility:visible;
+    translate:0 0;
+    transition:opacity .15s ease, translate .15s ease, visibility 0s;
+  }
+}
+
+/* 键盘 Tab 到点上时也要有提示（不依赖 hover 能力） */
+.stage:has(.pos.n2:focus-visible) .bubble--n2,
+.stage:has(.pos.n3:focus-visible) .bubble--n3,
+.stage:has(.pos.n4:focus-visible) .bubble--n4,
+.stage:has(.pos.n5:focus-visible) .bubble--n5,
+.stage:has(.pos.n6:focus-visible) .bubble--n6{
+  opacity:1;
+  visibility:visible;
+  translate:0 0;
+}
+
+/* 卡片已经展开时，气泡一律收掉 —— 同一时刻只让一个东西说话。
+   !important 是刻意的：hover 规则的 :has() 特异性很高，普通选择器压不住。 */
+.stage.has-card .bubble{ opacity:0 !important; visibility:hidden !important; }
+
+.card{
+  position:absolute;
+  width:23.75rem;                          /* 380 */
+  padding:1.5rem 1.5rem 1.375rem;          /* 24 24 22 */
+  border-radius:1.125rem;                  /* 18 */
+  background:var(--c-white);
+  box-shadow:
+    0 1.75rem 3.5rem -.75rem rgba(0,16,41,.16),
+    0 .5rem   1.5rem -.5rem  rgba(0,16,41,.10);
+  transform:translateY(-50%);              /* top 给的是圆心，卡片自身垂直居中 */
+  translate:0 .875rem;                     /* 浮现起点：从下方 14px 升上来 */
+  opacity:0;
+  visibility:hidden;
+  filter:blur(6px);
+  pointer-events:auto;
+
+  /* 两套时长：浮现 0.2s（要快），收起 0.34s（要干净，别挡下一张卡）。
+     停留 3s 由文末脚本的计时器控制 —— 见 .card.is-open 上方的说明。 */
+  --t-in:.2s;
+  --t-out:.34s;
+  transition:
+    opacity    var(--t-out) ease,
+    translate  var(--t-out) ease,
+    filter     var(--t-out) ease,
+    visibility 0s           var(--t-out);
+}
+
+/* 五张卡的落点（left / top 都是设计 px ÷ 16；top 是卡片的垂直中心）。
+   排布原则（7 个点挨得太近，卡片 380×250 无处可放，只能取舍）：
+     ① 绝不压住别的黑点（被压住的点会变得不可点，比难看严重得多）；
+     ② 绝不让卡片边缘"切"过任何文字 —— 要么整块让开，要么整块盖住；
+     ③ 在满足 ①② 的前提下尽量贴着本点。
+   n2/n3/n4 统一放在"整行文字（点 + 组名）的右侧"，于是三张卡左缘对齐；
+   n5 右侧会切到 n4 的组名，改放左侧，代价是盖住自己的组名（卡头本来就写着组名）；
+   n6 右下方是画板外的死区，也放左侧。 */
+.card--n2{ left:29.125rem;  top:16.125rem;  }   /* 466,258   点 258,263 */
+.card--n3{ left:29.125rem;  top:14.25rem;   }   /* 466,228   点 338,393 */
+.card--n4{ left:43.5rem;    top:28.5rem;    }   /* 696,456   点 476,456 */
+.card--n5{ left:2.1875rem;  top:35.375rem;  }   /* 35,566    点 447,566（放左侧） */
+.card--n6{ left:20.0625rem; top:44.1875rem; }   /* 321,707   点 747,703（放左侧） */
+
+/* 打开态：由文末脚本挂 .is-open，浮现 0.2s，3s 后自动摘掉。
+   ⚠️ 为什么不用纯 CSS 的 `:has(:hover)` + animation：
+   · `:hover` 的存活期 = "指针停在点上"，它不会自己到期，做不到"3s 后消失"；
+   · 若把 3s 塞进一条 `animation`，指针一离开点、animation 被摘掉，
+     卡片会立刻跳回隐藏态 —— 从黑点挪向卡片、穿过中间那段空隙时就会闪一下；
+   · `transition` 只能表达"hover 到 = 出现"，同样没有到期概念。
+   状态交给 JS 明确持有，CSS 只负责两段过渡，进出都干净。 */
+.card.is-open{
+  opacity:1;
+  visibility:visible;
+  translate:0 0;
+  filter:blur(0);
+  transition:
+    opacity    var(--t-in) ease-out,
+    translate  var(--t-in) cubic-bezier(.16,.72,.24,1),
+    filter     var(--t-in) ease-out,
+    visibility 0s;
+}
+
+/* ---------------- 卡片内部 ---------------- */
+.card__eyebrow{
+  display:flex;
+  align-items:baseline;
+  gap:.5rem;
+  margin:0 0 .625rem;
+  padding-right:1.5rem;         /* 给右上角的关闭按钮让位 */
+  line-height:1;
+}
+.card__group{
+  font-family:var(--font-cjk);
+  font-weight:700;
+  font-size:.9375rem;      /* 15 */
+  color:var(--c-blue);
+}
+.card__sep{ color:#C6CBD4; }
+.card__tag{
+  font-family:var(--font-latin);
+  font-size:.6875rem;      /* 11 */
+  font-weight:600;
+  letter-spacing:.16em;
+  color:#9AA0A6;
+}
+/* 卡片正文改成「资料清单」：一句定位 + 2 条资料 + 全部资料入口。
+   一个大标题 + 一段散文撑不起 hover 的成本 —— 用户要的是"这里有什么"。 */
+.card__lead{
+  margin:0 0 .875rem;
+  font-family:var(--font-cjk);
+  font-size:.9375rem;      /* 15 */
+  line-height:1.5;
+  color:#6E7480;
+}
+.card__list{
+  margin:0;
+  padding:.375rem 0 0;
+  border-top:1px solid #EEF2F7;
+  list-style:none;
+}
+.card__item{
+  display:flex;
+  align-items:center;
+  gap:.625rem;
+  padding:.625rem .75rem;
+  margin:0 -.75rem;            /* 悬停底色比文字左右各宽 12px */
+  border-radius:.5rem;
+  font-family:var(--font-cjk);
+  font-size:.8125rem;          /* 13 */
+  color:var(--c-ink);
+  text-decoration:none;
+  transition:background-color .18s ease, color .18s ease;
+}
+.card__item:hover{ background:#F2F6FC; color:var(--c-blue); }
+.card__item-name{
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.card__item-kind{
+  flex:none;
+  font-family:var(--font-latin);
+  font-size:.6875rem;          /* 11 */
+  color:#9AA0A6;
+}
+.card__item svg{
+  width:.75rem;
+  height:.75rem;
+  flex:none;
+  opacity:.5;
+}
+.card__close{
+  position:absolute;
+  top:.75rem;
+  right:.75rem;
+  width:1.5rem;
+  height:1.5rem;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:#8E959F;
+  cursor:pointer;
+}
+.card__close:hover{ background:#F1F4F9; color:var(--c-navy); }
+.card__close svg{ width:.75rem; height:.75rem; }
+.card__more{
+  display:flex;
+  width:100%;
+  align-items:center;
+  gap:.375rem;
+  margin-top:.375rem;
+  padding-top:.75rem;
+  border-top:1px solid #EEF2F7;
+  font-family:var(--font-cjk);
+  font-size:.875rem;
+  font-weight:700;
+  color:var(--c-blue);
+  text-decoration:none;
+}
+.card__more svg{
+  width:.875rem;
+  height:.875rem;
+  transition:transform .26s cubic-bezier(.22,1.2,.36,1);
+}
+.card__more:hover svg{ transform:translate(2px,-2px); }
+
+/* 返回按钮：同上的发光，另加一圈描边表示可点 */
+.back{ text-decoration:none; cursor:pointer; }
+.back:focus-visible{ outline:none; }
+.back:focus-visible .core{ stroke:var(--c-blue); stroke-width:2; }
+
+/* ---------------- 降级：直接给终态 ---------------- */
+@media (prefers-reduced-motion:reduce){
+  .trace{ animation:none; stroke-dashoffset:0; }
+  .node{ animation:none; opacity:1; transform:none; }   /* 只作用于内层，不动 .pos 的 translate */
+  .lbl{ animation:none; opacity:1; transform:none; }
+  .halo{ transition:none; }
+  .lbl{ transition:none; }
+  .card{ --t-in:0s; --t-out:0s; }   /* 卡片直接出现/消失，不做浮现与收起的过渡 */
+  .bubble{ transition:none; }
+  .card__item{ transition:none; }
+  .card__more svg{ transition:none; }
+}
+</style>
+</head>
+<body>
+<main class="stage">
+
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet"
+       xmlns="http://www.w3.org/2000/svg" aria-label="学习资料">
+
+    <defs>
+      <radialGradient id="glow">
+        <stop offset="35.29%" stop-color="#0066FF" stop-opacity=".39"/>
+        <stop offset="100%"   stop-color="#0066FF" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- 装饰：浅蓝圆 + 蓝色环（均超出画板，由 .stage 裁切） -->
+    <g class="deco" aria-hidden="true">
+      <circle class="disc" cx="1260" cy="154.6" r="294.3"/>
+      <ellipse class="ring" cx="1253" cy="171.31" rx="364.94" ry="142.88"
+               transform="rotate(-20.5 1253 171.31)"/>
+    </g>
+
+    <!-- 标题（基线与设计稿一致：y = 136） -->
+    <g class="head">
+      <text class="title title--study"    x="853.2" y="136">Study</text>
+      <text class="title title--material" x="1082"  y="136">Material</text>
+    </g>
+
+    <g class="road">
+
+      <!-- 折线。顶点是对设计稿墨迹做总体最小二乘拟合得到的「线真正画在哪」，
+           与下面圆点的圆心可以差 1~2px —— 设计稿里线和点本来就是分别摆的 -->
+      <path class="trace" pathLength="1"
+            d="M85.16 180.15 L258.46 264.84 L337.45 395.16 L477.33 456.07
+               L445.30 568.22 L747.49 702.83 L909.85 619.86"/>
+
+      <!-- ============ 1. 起点（无标签，路线的开端） ============ -->
+      <g class="pos n1" transform="translate(85.16 180.15)">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+      </g>
+
+      <!-- ============ 2. 设计组 Design ============ -->
+      <g class="pos n2" transform="translate(258.28 263.32)" tabindex="0"
+         aria-label="设计组">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+        <text class="lbl lbl--cjk" x="30.72"  y="6.68">设计组</text>
+        <text class="lbl lbl--en"  x="102.22" y="5.68">Design</text>
+      </g>
+
+      <!-- ============ 3. 前端组 Frontend ============ -->
+      <g class="pos n3" transform="translate(338.05 392.88)" tabindex="0"
+         aria-label="前端组">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+        <text class="lbl lbl--cjk" x="-199.05" y="9.12">前端组</text>
+        <text class="lbl lbl--en"  x="-127.55" y="8.12">Frontend</text>
+      </g>
+
+      <!-- ============ 4. 后端组 Backend ============ -->
+      <g class="pos n4" transform="translate(475.96 456.11)" tabindex="0"
+         aria-label="后端组">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+        <text class="lbl lbl--cjk" x="30.04"  y="8.89">后端组</text>
+        <text class="lbl lbl--en"  x="111.54" y="7.89">Backend</text>
+      </g>
+
+      <!-- ============ 5. 产品组 product ============ -->
+      <g class="pos n5" transform="translate(447.02 566.18)" tabindex="0"
+         aria-label="产品组">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+        <text class="lbl lbl--cjk" x="-191.02" y="8.82">产品组</text>
+        <text class="lbl lbl--en"  x="-118.52" y="7.82">product</text>
+      </g>
+
+      <!-- ============ 6. 运营组 operation ============ -->
+      <g class="pos n6" transform="translate(746.89 702.97)" tabindex="0"
+         aria-label="运营组">
+        <g class="node">
+          <circle class="halo"      r="25.5"/>
+          <circle class="core"      r="8"/>
+          <circle class="core-blue" r="9"/>
+          <circle class="hit"       r="30"/>
+        </g>
+        <text class="lbl lbl--cjk" x="7.11"  y="48.03">运营组</text>
+        <text class="lbl lbl--en"  x="80.61" y="47.03">operation</text>
+      </g>
+
+      <!-- ============ 7. 返回 Return（终点，链接回首页） ============ -->
+      <a class="back" href="index.html" aria-label="返回首页">
+        <g class="pos n7" transform="translate(909.85 619.86)">
+          <g class="node">
+            <circle class="halo"      r="25.5"/>
+            <circle class="core"      r="8"/>
+            <circle class="core-blue" r="9"/>
+            <circle class="hit"       r="30"/>
+          </g>
+          <text class="lbl lbl--cjk" x="30.84" y="8.85">返回</text>
+          <text class="lbl lbl--en"  x="82.84" y="7.85">Return</text>
+        </g>
+      </a>
+
+    </g>
+  </svg>
+
+  <!-- ============================================================
+       两层浮层，都在 SVG 之后（= 压在所有节点之上）：
+       .bubbles  微卡：hover / 聚焦时紧贴现，只放一句定位 + 一个入口
+       .cards    完整卡片：点击点之后展开，常驻，直到 Esc / 点空白 / 关闭
+       两层都是 pointer-events:none，只有内部元素接指针 ——
+       否则整块画板的 hover 与点击都会被它们吃掉（首页 .posts 踩过这个坑）。
+       ============================================================ -->
+  <div class="bubbles" aria-hidden="true">
+    <div class="bubble bubble--n2 bubble--l">
+      <span class="bubble__line">把抽象需求画成能看的界面</span>
+      <span class="bubble__cta">查看资料 →</span>
+    </div>
+    <div class="bubble bubble--n3 bubble--r">
+      <span class="bubble__line">把设计稿变成能点的页面</span>
+      <span class="bubble__cta">查看资料 →</span>
+    </div>
+    <div class="bubble bubble--n4 bubble--l">
+      <span class="bubble__line">让数据稳定地流动起来</span>
+      <span class="bubble__cta">查看资料 →</span>
+    </div>
+    <div class="bubble bubble--n5 bubble--r">
+      <span class="bubble__line">想清楚为什么再做怎么做</span>
+      <span class="bubble__cta">查看资料 →</span>
+    </div>
+    <div class="bubble bubble--n6 bubble--r">
+      <span class="bubble__line">让好内容被更多人看见</span>
+      <span class="bubble__cta">查看资料 →</span>
+    </div>
+  </div>
+
+  <div class="cards">
+
+    <article class="card card--n2">
+      <button class="card__close" type="button" aria-label="关闭">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="card__eyebrow">
+        <span class="card__group">设计组</span>
+        <span class="card__sep">·</span>
+        <span class="card__tag">学习资料</span>
+      </p>
+      <p class="card__lead">把抽象需求画成能看的界面</p>
+      <ul class="card__list">
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 01</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 02</span><span class="card__item-kind">视频</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      </ul>
+      <a class="card__more" href="index.html#blog">查看该组全部资料<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </article>
+
+    <article class="card card--n3">
+      <button class="card__close" type="button" aria-label="关闭">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="card__eyebrow">
+        <span class="card__group">前端组</span>
+        <span class="card__sep">·</span>
+        <span class="card__tag">学习资料</span>
+      </p>
+      <p class="card__lead">把设计稿变成能点的页面</p>
+      <ul class="card__list">
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 01</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 02</span><span class="card__item-kind">视频</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      </ul>
+      <a class="card__more" href="index.html#blog">查看该组全部资料<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </article>
+
+    <article class="card card--n4">
+      <button class="card__close" type="button" aria-label="关闭">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="card__eyebrow">
+        <span class="card__group">后端组</span>
+        <span class="card__sep">·</span>
+        <span class="card__tag">学习资料</span>
+      </p>
+      <p class="card__lead">让数据稳定地流动起来</p>
+      <ul class="card__list">
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 01</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 02</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      </ul>
+      <a class="card__more" href="index.html#blog">查看该组全部资料<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </article>
+
+    <article class="card card--n5">
+      <button class="card__close" type="button" aria-label="关闭">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="card__eyebrow">
+        <span class="card__group">产品组</span>
+        <span class="card__sep">·</span>
+        <span class="card__tag">学习资料</span>
+      </p>
+      <p class="card__lead">想清楚为什么再做怎么做</p>
+      <ul class="card__list">
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 01</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 02</span><span class="card__item-kind">模板</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      </ul>
+      <a class="card__more" href="index.html#blog">查看该组全部资料<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </article>
+
+    <article class="card card--n6">
+      <button class="card__close" type="button" aria-label="关闭">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="card__eyebrow">
+        <span class="card__group">运营组</span>
+        <span class="card__sep">·</span>
+        <span class="card__tag">学习资料</span>
+      </p>
+      <p class="card__lead">让好内容被更多人看见</p>
+      <ul class="card__list">
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 01</span><span class="card__item-kind">文档</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+        <li><a class="card__item" href="index.html#blog"><span class="card__item-name">［待填］资料名称 02</span><span class="card__item-kind">视频</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      </ul>
+      <a class="card__more" href="index.html#blog">查看该组全部资料<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 11.8 11.8 4.2M6 4.2h5.8V10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </article>
+
+  </div>
+
+</main>
+
+<script>
+/* 微卡负责「试探」，卡片负责「确认」——两者分工：
+   · hover / Tab 聚焦 → 出微卡（纯 CSS，靠 :has() + .bubble:hover，无 JS）；
+   · 点一下点 → 展开完整卡片并**常驻**，直到 Esc / 点空白 / 点关闭按钮；
+   · 卡片开着时气泡全收（.stage.has-card），同一时刻只有一个东西说话。
+   JS 只做状态切换，不碰任何几何。 */
+(() => {
+  const stage = document.querySelector('.stage');
+  const pairs = [];          // [{pos, card}]，用于同步 aria-expanded
+  let openCard = null;
+
+  function close() {
+    if (!openCard) return;
+    openCard.classList.remove('is-open');
+    pairs.find((p) => p.card === openCard).pos.setAttribute('aria-expanded', 'false');
+    stage.classList.remove('has-card');
+    openCard = null;
+  }
+
+  function open(card) {
+    if (openCard === card) return;
+    if (openCard) {
+      openCard.classList.remove('is-open');
+      pairs.find((p) => p.card === openCard).pos.setAttribute('aria-expanded', 'false');
+    }
+    openCard = card;
+    card.classList.add('is-open');
+    pairs.find((p) => p.card === card).pos.setAttribute('aria-expanded', 'true');
+    stage.classList.add('has-card');
+  }
+
+  for (const pos of document.querySelectorAll('.pos[tabindex]')) {
+    const key = [...pos.classList].find((c) => /^n\d+$/.test(c));
+    const card = key && document.querySelector('.card--' + key);
+    if (!card) continue;                       // n1 是装饰点；n7 是链接，无卡
+    pairs.push({ pos, card });
+    pos.setAttribute('role', 'button');
+    pos.setAttribute('aria-expanded', 'false');
+    pos.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCard === card ? close() : open(card);
+    });
+    /* <g tabindex> 不会因回车自动 click，键盘用户要单独给一条路 */
+    pos.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openCard === card ? close() : open(card);
+      }
+    });
+  }
+
+  document.querySelectorAll('.card__close').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+  });
+
+  stage.addEventListener('click', (e) => {
+    if (!openCard) return;
+    if (e.target.closest('.card') || e.target.closest('.pos')) return;
+    close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,31 +1,48 @@
-"use client";
+'use client'
 
-import React from "react";
-import "./join.scss";
-import Petal from "../petal/petal";
+import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
+import arrow from '@/image/箭头.svg'
+import './join.scss'
+
 export default function Join() {
-	function handleJoin() {
-		window.location.href = "http://fresh.muxixyz.com/";
-	}
-	return (
-		<div>
-			<Petal />
-			<div className="join-web">
-				<div className="background-img-container">
-					<img
-						src="http://static.muxixyz.com/index_site/join2.png"
-						className="background-star"
-					/>
-				</div>
+  const joinRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-				<div className="background-button-container">
-					<img
-						src="http://static.muxixyz.com/index_site/join_button.png"
-						className="background-button-inner"
-						onClick={() => handleJoin()}
-					/>
-				</div>
-			</div>
-		</div>
-	);
+  useEffect(() => {
+    const element = joinRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { root: element.closest('.home'), threshold: 0.2 },
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={joinRef} className={`join-web${isVisible ? ' is-visible' : ''}`}>
+      <div className="join-container">
+        <a className="join-signup" href="https://fresh.muxixyz.com/join">
+          <span>立即报名</span>
+          <Image className="join-signup-arrow" src={arrow} alt="" aria-hidden="true" />
+        </a>
+      </div>
+      <div className="join-accent" aria-hidden="true" />
+      <div className="join-accent join-accent-dark" aria-hidden="true" />
+      <div className="join-accent join-accent-blue" aria-hidden="true" />
+      <div className="join-accent join-accent-orange" aria-hidden="true" />
+      <div className="join-word join-word-join">
+        <span>JOIN</span>
+      </div>
+      <div className="join-word join-word-us">US</div>
+    </div>
+  )
 }

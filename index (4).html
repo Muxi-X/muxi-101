@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木犀官网 · 博客</title>
+<style>
+/* ============================================================
+   Design tokens  — 来自设计稿色彩系统
+   #D8D8D8  #3D3D3D  #ECEBEB  #999999  #FFFFFF  #000000  #7322FF
+   #3D3D3D @77%
+   ============================================================ */
+:root{
+  --c-line:      #D8D8D8;
+  --c-ink:       #3D3D3D;
+  --c-ink-77:    rgba(61,61,61,.77);
+  --c-surface:   #ECEBEB;
+  --c-muted:     #999999;
+  --c-white:     #FFFFFF;
+  --c-black:     #000000;
+  --c-brand:     #7322FF;
+
+  /* 拉丁字体 = Microsoft YaHei UI；中文 = 思源黑体 */
+  --font-latin:  "Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+  --font-cjk:    "Source Han Sans SC","Source Han Sans CN","Noto Sans SC","思源黑体",sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  /* 1rem = 16 设计像素；画板 1440x900 任意视口下完整等比显示 */
+  font-size: calc(min(100vw / 1440, 100vh / 900) * 16);
+}
+
+body{
+  margin:0;
+  background:var(--c-white);
+  display:grid;
+  place-items:center;
+  min-height:100vh;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+.stage{
+  position:relative;
+  width:90rem;      /* 1440 */
+  height:56.25rem;  /* 900  */
+  overflow:hidden;
+  background:var(--c-white);
+  flex:0 0 auto;
+}
+
+/* ---------------- 左侧文案区 ---------------- */
+
+.kicker{
+  position:absolute;
+  left:1.875rem;    /* x 30 → 墨迹左缘 39 */
+  top:3.1875rem;    /* y 51 → 墨迹顶 49 */
+  margin:0;
+  font-family:var(--font-latin);
+  font-weight:700;
+  font-size:6rem;          /* 96px → 墨迹高 75，与设计稿等高 */
+  line-height:.7396;       /* 71 → 盒高 71，不撑高父级 */
+  /* 雅黑 Bold 96px 自然宽 271，设计稿 252，差 19px ÷ 4 字 ≈ -4.75px */
+  letter-spacing:-.0167em;
+  color:var(--c-black);
+}
+
+.headline{
+  position:absolute;
+  left:1.8125rem;   /* x 29 → 墨迹左缘 34 */
+  top:8.9375rem;    /* y 143 → line1 墨迹顶 145 */
+  margin:0;
+  font-family:var(--font-latin);
+  font-weight:400;         /* 设计稿为 Regular，笔画 7~8px（Bold 会到 10~14px）*/
+  font-size:4.0625rem;     /* 65px → L1 墨迹 492x53（稿 482x52）；L2 508x68（稿 496x66）*/
+  line-height:.878;        /* 57 → 行距 57，line2 墨迹顶 202 */
+  letter-spacing:-.0075em;
+  color:var(--c-black);
+}
+.headline span{ display:block; }
+
+.section-title{
+  position:absolute;
+  left:2rem;        /* x 32 → 墨迹 33 */
+  top:17.25rem;     /* y 276 */
+  margin:0;
+  font-family:var(--font-cjk);
+  font-weight:700;
+  font-size:2.9375rem;     /* 47px */
+  line-height:1.08;        /* 51 → 盒高 51 */
+  letter-spacing:0;
+  color:var(--c-ink);
+}
+
+.btn{
+  position:absolute;
+  left:2.125rem;    /* x 34 → 与「热门文章」墨迹左缘精确对齐 */
+  top:22.125rem;    /* y 354 */
+  width:11.5rem;    /* 184 → 右缘 x 217，与「热门文章」墨迹右缘精确对齐 */
+  height:2.875rem;  /* 46  */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  /* 描边与底色同色 → 静置时完全看不出来（两态渲染一致，不影响像素对齐）；
+     hover 反色成白底时，它就变成那圈必需的紫描边。
+     用 border 而不是 box-shadow，是为了在 box-sizing:border-box 下
+     不改变 184×46 的外框。 */
+  border:2px solid var(--c-brand);
+  border-radius:1.4375rem;  /* 23 = h/2 全圆角胶囊 */
+  background:var(--c-brand);
+  color:var(--c-white);
+  font-family:var(--font-cjk);
+  font-weight:400;
+  font-size:1.25rem;        /* 20px（原 18px，+2）*/
+  line-height:1;
+  letter-spacing:.02em;
+  text-decoration:none;
+  cursor:pointer;
+  transition:
+    background-color .26s ease,
+    color            .26s ease,
+    border-color     .26s ease,
+    transform        .26s cubic-bezier(.34,1.4,.64,1);  /* 轻微回弹 */
+}
+/* 按下比悬停略小一点 —— 读起来像"压进去"，而不是"又弹一下" */
+.btn:active{ transform:scale(1.03); }
+.btn:focus-visible{ outline:2px solid var(--c-brand); outline-offset:3px; }
+
+.footer-note{
+  position:absolute;
+  left:1.875rem;    /* x 30 */
+  top:48.9375rem;   /* y 783 */
+  margin:0;
+  font-family:var(--font-latin);
+  font-weight:400;
+  font-size:2.25rem;        /* 36px */
+  line-height:1.05;         /* 38 → 盒高 38 */
+  color:var(--c-muted);
+  cursor:pointer;
+  white-space:nowrap;      /* 改成 <a> 后加：避免窄视口下断行 */
+  /* 颜色 / 上浮 / 下划线一起过渡；写在基础选择器上，移开鼠标自动反向回放 */
+  transition:color .24s ease,
+             transform .24s cubic-bezier(.22,1,.36,1),
+             text-decoration-color .24s ease;
+  text-decoration:underline transparent;   /* 下划线先占位，避免 hover 时行盒高度变化 */
+  text-underline-offset:.12em;
+  text-decoration-thickness:.06em;
+}
+
+/* ---------------- 右侧文章列表 ---------------- */
+
+.posts{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  list-style:none;
+  /* ⚠️ 这个 ul 是铺满整块画板的（left/top 0 + 100%×100%），而它在 DOM 里排在
+     .btn 后面 —— 同层同 z-index 时后写的盖前面，于是整块画板的点击都被它吃掉，
+     「进入博客」按钮看得见却点不动（elementFromPoint 打在按钮上返回的是 UL.posts）。
+     修法：本层不吃事件，只在真正的卡片链接上把事件开回来。
+     注意这是纯命中测试的改动，不产生任何布局/绘制变化。 */
+  pointer-events:none;
+}
+
+/* 分隔线：1px #D8D8D8，x 824 → 1391 (宽 568) */
+.posts::before,
+.posts::after{
+  content:"";
+  position:absolute;
+  left:51.5rem;     /* x 824 */
+  width:35.5rem;    /* 568 */
+  height:1px;
+  background:var(--c-line);
+}
+.posts::before{ top:8.5rem; }    /* y 136 */
+.posts::after { top:48.5rem; }   /* y 776 */
+
+.post{
+  position:absolute;
+  left:51.5rem;     /* x 824 */
+  width:35.5rem;    /* 568 */
+  height:10rem;     /* 160 = 卡片节距 */
+}
+.post:nth-child(1){ top:8.5rem; }      /* y 136 */
+.post:nth-child(2){ top:18.5rem; }     /* y 296 */
+.post:nth-child(3){ top:28.5rem; }     /* y 456 */
+.post:nth-child(4){ top:38.5rem; }     /* y 616 */
+
+/* 第 2~4 张卡的上分隔线（第 1 张由 .posts::before 提供） */
+.post + .post{ border-top:1px solid var(--c-line); }
+
+.post__link{
+  position:relative;
+  display:block;
+  width:100%;
+  height:100%;
+  pointer-events:auto;      /* 父级 ul 已设为 none，这里把卡片的可点区域开回来 */
+  text-decoration:none;
+  color:inherit;
+}
+
+.thumb{
+  position:absolute;
+  left:.5rem;       /* x 832 → 距卡左缘 8 */
+  top:1.5625rem;    /* y 161 → 距卡顶 25 */
+  width:9.4375rem;  /* 151 */
+  height:7rem;      /* 112 */
+  border-radius:.3125rem;  /* 5px */
+  background:var(--c-surface);
+  overflow:hidden;
+}
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 25%;   /* 原图 1:1，裁成 151x112 时偏上取景，保住整个头型 */
+  display:block;
+  /* 悬浮放大：用 transform 不动布局，缓出曲线让收尾更稳 */
+  transition:transform .55s cubic-bezier(.22,1,.36,1);
+}
+
+.post__title{
+  position:absolute;
+  left:13.0625rem;  /* x 1033 → 距卡左缘 209 */
+  top:2.3125rem;    /* y 173 → 墨迹 177 */
+  margin:0;
+  font-family:var(--font-cjk);
+  font-weight:500;       /* 原 700；本机 Noto Sans SC 为可变字体，500 是真实中间字重 */
+  font-size:2.25rem;     /* 36px */
+  line-height:1.04;      /* 37.4 → 墨迹高 ~33 */
+  letter-spacing:0;
+  color:var(--c-ink);
+  white-space:nowrap;
+  transition:color .22s ease;
+}
+
+.post__excerpt{
+  position:absolute;
+  left:13.0625rem;  /* x 1033 */
+  top:5.8125rem;     /* y 238 */
+  margin:0;
+  font-family:var(--font-cjk);
+  font-weight:400;
+  font-size:1.5rem;      /* 24px */
+  line-height:1.05;      /* 25 → 墨迹高 22 */
+  letter-spacing:0;
+  color:var(--c-muted);
+  white-space:nowrap;
+}
+
+/* ---------------- 悬浮反馈 ---------------- */
+@media (hover:hover) and (pointer:fine){
+  /* 「进入博客」按钮：整体反色（紫底白字 → 白底紫字）+ 轻微放大。
+     缩放走 transform 而不是 width/height —— 按钮是 left:34 绝对定位，
+     改宽度只会向右长；scale 以中心为原点，左右各出 5.5px，视觉是"长大一圈"。 */
+  .btn:hover,
+  .btn:focus-visible{
+    background:var(--c-white);
+    color:var(--c-brand);
+    transform:scale(1.06);          /* 184×46 → 195×48.8 */
+  }
+
+  /* 缩略图外框保持不动（不做位移），只让内部图片放大：
+     .thumb 有 overflow:hidden，img 以自身中心为原点缩放，
+     所以画面中心点不动、四周被裁掉 —— 视觉上就是"原地放大" */
+  .post__link:hover .thumb img{ transform:scale(1.08); }   /* 图片轻微放大 */
+  .post__link:hover .post__title{ color:var(--c-brand); }
+  .post__link:focus-visible{ outline:2px solid var(--c-brand); outline-offset:6px; border-radius:.25rem; }
+
+  .footer-note:hover{
+    color:var(--c-brand);
+    text-decoration-color:currentColor;   /* 只点亮下划线颜色 */
+    transform:translateY(-5px);           /* 向上浮动 */
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{ transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+<main class="stage">
+
+  <h1 class="kicker">BLOG</h1>
+
+  <h2 class="headline"><span>Find the articles</span><span>that interest you</span></h2>
+
+  <h3 class="section-title">热门文章</h3>
+
+  <a class="btn" href="#blog">进入博客</a>
+
+  <ul class="posts">
+    <li class="post">
+      <a class="post__link" href="#post-1">
+        <span class="thumb"><img src="assets/thumb.jpg" alt=""></span>
+        <h4 class="post__title">标题标题标题标题</h4>
+        <p class="post__excerpt">部分内容文本</p>
+      </a>
+    </li>
+    <li class="post">
+      <a class="post__link" href="#post-2">
+        <span class="thumb"><img src="assets/thumb.jpg" alt=""></span>
+        <h4 class="post__title">标题标题标题标题</h4>
+        <p class="post__excerpt">部分内容文本</p>
+      </a>
+    </li>
+    <li class="post">
+      <a class="post__link" href="#post-3">
+        <span class="thumb"><img src="assets/thumb.jpg" alt=""></span>
+        <h4 class="post__title">标题标题标题标题</h4>
+        <p class="post__excerpt">部分内容文本</p>
+      </a>
+    </li>
+    <li class="post">
+      <a class="post__link" href="#post-4">
+        <span class="thumb"><img src="assets/thumb.jpg" alt=""></span>
+        <h4 class="post__title">标题标题标题标题</h4>
+        <p class="post__excerpt">部分内容文本</p>
+      </a>
+    </li>
+  </ul>
+
+  <a class="footer-note" href="study.html">Study Materials</a>
+
+</main>
+</body>
+</html>
