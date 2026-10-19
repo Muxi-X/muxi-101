@@ -31,7 +31,7 @@ const Header: React.FC = () => {
 		{
 			name: "加入我们",
 			style: "header-primary",
-			route: "/join",
+			route: "/#join",
 		},
 	];
 

@@ -15,6 +15,7 @@ const characters = [
 export default function First() {
   const scrollToSection = (sectionId: string) => {
     const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    window.history.pushState(null, '', `#${sectionId}`)
     document.getElementById(sectionId)?.scrollIntoView({ behavior })
   }
 

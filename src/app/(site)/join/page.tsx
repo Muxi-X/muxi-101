@@ -1,5 +1,5 @@
-import JoinUs from '@/views/join'
+import { redirect } from 'next/navigation'
 
 export default function Page() {
-  return <JoinUs />
+  redirect('/#join')
 }
