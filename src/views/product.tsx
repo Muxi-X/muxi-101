@@ -271,15 +271,17 @@ export default function ProductIntro() {
                 alt={`${selectedProduct}界面 ${screen.name}`}
                 width={920}
                 height={2000}
-                style={{
-                  left: `calc(${screen.left} * var(--u))`,
-                  top: `calc(${screen.top} * var(--u))`,
-                  width: `calc(${screen.width} * var(--u))`,
-                  height: `calc(${screen.height} * var(--u))`,
-                  '--r': `${screen.rotation}deg`,
-                  '--d': `${screen.delay}s`,
-                  zIndex: screen.layer,
-                }}
+                style={
+                  {
+                    left: `calc(${screen.left} * var(--u))`,
+                    top: `calc(${screen.top} * var(--u))`,
+                    width: `calc(${screen.width} * var(--u))`,
+                    height: `calc(${screen.height} * var(--u))`,
+                    '--r': `${screen.rotation}deg`,
+                    '--d': `${screen.delay}s`,
+                    zIndex: screen.layer,
+                  } as React.CSSProperties
+                }
               />
             ))}
           </div>
