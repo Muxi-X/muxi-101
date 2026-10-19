@@ -29,5 +29,17 @@
     "oxlint": "^1.78.0",
     "sass": "^1.89.2",
     "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.5.2",
+  "pnpm": {
+    "patchedDependencies": {
+      "nextra-theme-docs@4.6.1": "patches/nextra-theme-docs@4.6.1.patch"
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@tailwindcss/oxide",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
