@@ -2,14 +2,14 @@
 
 import StudioMark from './studio-mark'
 
-const assetBase = '/mengbanzu/'
+const assetBase = '/hero/'
 
 const characters = [
-  { className: 'character-1', file: '蒙版组 1.svg', alt: '人物素材 1' },
-  { className: 'character-2', file: '蒙版组 2.svg', alt: '人物素材 2' },
-  { className: 'character-3', file: '蒙版组 3.svg', alt: '人物素材 3' },
-  { className: 'character-4', file: '蒙版组 4.svg', alt: '人物素材 4' },
-  { className: 'character-5', file: '蒙版组 5 (1).svg', alt: '人物素材 5' },
+  { className: 'character-1', file: 'design.svg', alt: '设计组角色立绘' },
+  { className: 'character-2', file: 'operations.svg', alt: '运营组角色立绘' },
+  { className: 'character-3', file: 'frontend.svg', alt: '前端组角色立绘' },
+  { className: 'character-4', file: 'backend.svg', alt: '后端组角色立绘' },
+  { className: 'character-5', file: 'product.svg', alt: '产品组角色立绘' },
 ]
 
 export default function First() {
@@ -39,9 +39,9 @@ export default function First() {
       </div>
       <div className="first-logo" role="img" aria-label="木犀 Logo" />
       <div className="first-brand-name">MUXI STUDIO</div>
-      <img className="first-container-icon" src="/nav/容器.svg" alt="" aria-hidden="true" />
+      <img className="first-container-icon" src="/nav/lightbulb.svg" alt="" aria-hidden="true" />
       {characters.map(({ className, file, alt }) => (
-        <img key={className} className={className} src={`${assetBase}${encodeURI(file)}`} alt={alt} />
+        <img key={className} className={className} src={`${assetBase}${file}`} alt={alt} />
       ))}
       <StudioMark />
     </div>
