@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import studyOutline from '@/image/product/圆形 230.svg'
+import studyOutline from '@/image/blog/study-outline.svg'
 
 type BlogPost = {
   id: string

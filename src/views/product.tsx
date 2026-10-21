@@ -5,12 +5,12 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import iconXiazi from '@/image/product/xiaziIcon.svg'
 import iconCixing from '@/image/product/cixingIcon.svg'
 import iconKezhan from '@/image/product/kezhanIcon.svg'
-import iconXuexitong from '@/image/product/xuexitongIcon.svg'
-import xiaziScreen111 from '@/image/product/xiazi/111.jpg'
-import xiaziScreen222 from '@/image/product/xiazi/222.jpg'
-import xiaziScreen333 from '@/image/product/xiazi/333.jpg'
-import xiaziScreen444 from '@/image/product/xiazi/444.jpg'
-import xiaziScreen555 from '@/image/product/xiazi/555.jpg'
+import iconXiaolingtong from '@/image/product/xiaolingtongIcon.svg'
+import xiaziScreen1 from '@/image/product/xiazi/1.jpg'
+import xiaziScreen2 from '@/image/product/xiazi/2.jpg'
+import xiaziScreen3 from '@/image/product/xiazi/3.jpg'
+import xiaziScreen4 from '@/image/product/xiazi/4.jpg'
+import xiaziScreen5 from '@/image/product/xiazi/5.jpg'
 import cixingScreen1 from '@/image/product/cixing/1.png'
 import cixingScreen2 from '@/image/product/cixing/2.png'
 import cixingScreen3 from '@/image/product/cixing/3.png'
@@ -26,8 +26,8 @@ import xiaolingtongScreen2 from '@/image/product/xiaolingtong/2.png'
 import xiaolingtongScreen3 from '@/image/product/xiaolingtong/3.png'
 import xiaolingtongScreen4 from '@/image/product/xiaolingtong/4.png'
 import xiaolingtongScreen5 from '@/image/product/xiaolingtong/5.png'
-import iphonePro from '@/image/iphonepro.svg'
-import point from '@/image/point.svg'
+import iphonePro from '@/image/product/iphonepro.png'
+import point from '@/image/product/point.svg'
 import ProductRipple from './product-ripple'
 import './product.scss'
 
@@ -35,13 +35,13 @@ const apps = [
   { src: iconXiazi, title: '华师匣子' },
   { src: iconCixing, title: '此行' },
   { src: iconKezhan, title: '木犀课栈' },
-  { src: iconXuexitong, title: '校灵通' },
+  { src: iconXiaolingtong, title: '校灵通' },
 ]
 
 const xiaziScreens = [
   {
-    src: xiaziScreen111,
-    name: '111',
+    src: xiaziScreen1,
+    name: '1',
     left: -9.83,
     top: 79.94,
     width: 150.15,
@@ -51,8 +51,8 @@ const xiaziScreens = [
     delay: 0.16,
   },
   {
-    src: xiaziScreen222,
-    name: '222',
+    src: xiaziScreen2,
+    name: '2',
     left: 103.24,
     top: 37.47,
     width: 168.58,
@@ -62,8 +62,8 @@ const xiaziScreens = [
     delay: 0.08,
   },
   {
-    src: xiaziScreen333,
-    name: '333',
+    src: xiaziScreen3,
+    name: '3',
     left: 254.67,
     top: 0,
     width: 201.4,
@@ -73,8 +73,8 @@ const xiaziScreens = [
     delay: 0,
   },
   {
-    src: xiaziScreen444,
-    name: '444',
+    src: xiaziScreen4,
+    name: '4',
     left: 438.92,
     top: 37.47,
     width: 168.58,
@@ -84,8 +84,8 @@ const xiaziScreens = [
     delay: 0.08,
   },
   {
-    src: xiaziScreen555,
-    name: '555',
+    src: xiaziScreen5,
+    name: '5',
     left: 570.42,
     top: 79.94,
     width: 150.15,

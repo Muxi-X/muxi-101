@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import arrow from '@/image/箭头.svg'
+import arrow from '@/image/join/arrow.svg'
 import './join.scss'
 
 export default function Join() {
