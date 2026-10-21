@@ -1,15 +1,20 @@
 'use client'
 
+import Image from 'next/image'
 import StudioMark from './studio-mark'
-
-const assetBase = '/hero/'
+import lightbulbIcon from '@/assets/svgs/nav/lightbulb.svg'
+import heroDesign from '@/assets/svgs/hero/design.svg'
+import heroOperations from '@/assets/svgs/hero/operations.svg'
+import heroFrontend from '@/assets/svgs/hero/frontend.svg'
+import heroBackend from '@/assets/svgs/hero/backend.svg'
+import heroProduct from '@/assets/svgs/hero/product.svg'
 
 const characters = [
-  { className: 'character-1', file: 'design.svg', alt: '设计组角色立绘' },
-  { className: 'character-2', file: 'operations.svg', alt: '运营组角色立绘' },
-  { className: 'character-3', file: 'frontend.svg', alt: '前端组角色立绘' },
-  { className: 'character-4', file: 'backend.svg', alt: '后端组角色立绘' },
-  { className: 'character-5', file: 'product.svg', alt: '产品组角色立绘' },
+  { className: 'character-1', src: heroDesign, alt: '设计组角色立绘' },
+  { className: 'character-2', src: heroOperations, alt: '运营组角色立绘' },
+  { className: 'character-3', src: heroFrontend, alt: '前端组角色立绘' },
+  { className: 'character-4', src: heroBackend, alt: '后端组角色立绘' },
+  { className: 'character-5', src: heroProduct, alt: '产品组角色立绘' },
 ]
 
 export default function First() {
@@ -39,9 +44,9 @@ export default function First() {
       </div>
       <div className="first-logo" role="img" aria-label="木犀 Logo" />
       <div className="first-brand-name">MUXI STUDIO</div>
-      <img className="first-container-icon" src="/nav/lightbulb.svg" alt="" aria-hidden="true" />
-      {characters.map(({ className, file, alt }) => (
-        <img key={className} className={className} src={`${assetBase}${file}`} alt={alt} />
+      <Image className="first-container-icon" src={lightbulbIcon} alt="" aria-hidden="true" priority />
+      {characters.map(({ className, src, alt }) => (
+        <Image key={className} className={className} src={src} alt={alt} priority />
       ))}
       <StudioMark />
     </div>
